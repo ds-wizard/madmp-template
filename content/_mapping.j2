@@ -13,42 +13,104 @@
 {%- set contributorAffiliationQUuid = "68530470-1f1c-4448-8593-63a288713a66" -%}
 {%- set contributorRoleQUuid = "829dcda6-db8a-40ac-819a-92b9b52490f5" -%}
 {%- set contributorRoleContactPersonAUuid = "f7468e79-c621-4ac9-95e0-263ebdf23c73" -%}
-{%- set contributorRoleDataCuratorAUuid = "0ee99167-c1a2-4fe9-a799-ef07a31ccf35" -%}
 {%- set contributorRoleDataCollectorAUuid = "fe411838-170e-45d7-9d91-14f95ad347e6" -%}
+{%- set contributorRoleDataCuratorAUuid = "0ee99167-c1a2-4fe9-a799-ef07a31ccf35" -%}
 {%- set contributorRoleDataManagerAUuid = "6eef8c10-150a-496c-b02a-61c90e62e95b" -%}
 {%- set contributorRoleDistributorAUuid = "ae91b0b1-a591-49d1-a85c-13071550c043" -%}
+{%- set contributorRoleEditorAUuid = "b7ee1e51-2628-486e-a341-2437c546897d" -%}
+{%- set contributorRoleProducerAUuid = "ac02d12c-db42-4d47-a557-5fbd1d7ae524" -%}
+{%- set contributorRoleProjectLeaderAUuid = "c1caf2a7-fd84-4856-b3c4-35e09b5e1aca" -%}
+{%- set contributorRoleProjectManagerAUuid = "99f5e968-cea8-49bf-a406-f134e664e657" -%}
+{%- set contributorRoleProjectMemberAUuid = "53dade1c-828c-4887-829a-65b4540291d5" -%}
+{%- set contributorRoleResearcherAUuid = "369db75c-cf52-459a-836c-e3bcac3590bb" -%}
+{%- set contributorRoleRightsHolderAUuid = "5d758307-4e3a-439b-8c88-4dbdbfcd2154" -%}
+{%- set contributorRoleSponsorAUuid = "82ecfb2d-e321-47e4-93d8-e36a9a7031e9" -%}
+{%- set contributorRoleSupervisorAUuid = "c6883c1f-6dd8-4c5b-aa7d-b93e4e2d9378" -%}
+{%- set contributorRoleWorkPackageLeaderAUuid = "d24fd64b-6a66-4d22-80f0-2d1aae4a554f" -%}
+{%- set contributorRoleOtherAUuid = "dead02bb-d5b2-4036-9e99-3318f191b3d0" -%}
 {#- UUID paths -#}
-{#- Basic string fiels -#}
-{%- set dswProjectNamePath = [adminDetailsCUuid, projectNameQUuid]|reply_path -%}
-{%- set dswProjectName = repliesMap[dswProjectNamePath]|reply_str_value -%}
-
+{#- Basic DMP metadata -#}
 {#- maDMP variables -#}
-{%- set madmpDescription = "This maDMP has been created using Data Stewardship Wizard and based on knowledge model " ~ ctx.package.name ~ " (" ~ ctx.pId ~ "). The questionnaire used for this DMP is idenfitied by UUID \"" ~ ctx.questionnaireUuid ~ "\"." -%}
-{#- TODO: extract clientId (need adjust engine-backend) -#}
+{%- set madmpDescription = "This maDMP has been created using Data Stewardship Wizard and based on knowledge model " ~ ctx.package.name ~ " (" ~ ctx.package.pId ~ "). The questionnaire used for this DMP is idenfitied by UUID \"" ~ ctx.questionnaireUuid ~ "\"." -%}
+{#- TODO: extract clientUrl (need adjust engine-backend) -#}
 {%- set madmpDmpId = {
   "identifier": ctx.questionnaireUuid,
   "type": "other"
 }
 -%}
-{%- set madmpContributors = [
-  {
-    "id": "",
-    "idType": "",
-    "mbox": "",
-    "name": "",
-    "roles": [""]
-  }
-] -%}
-{%- set madmpProject = {
-  "title": dswProjectName
-}
+{#- Contributors (list) and contact -#}
+{%- set contributorsPath = [adminDetailsCUuid, contributorsQUuid]|reply_path -%}
+{%- set contributorsReply = repliesMap[contributorsPath].value.value -%}
+{%- set contributors = [] -%}
+{%- set contacts = [] -%}
+{%- for i in range(contributorsReply) -%}
+  {%- set contributorName = repliesMap[[contributorsPath, i, contributorNameQUuid]|reply_path]|reply_str_value -%}
+  {%- set contributorEmail = repliesMap[[contributorsPath, i, contributorEmailQUuid]|reply_path]|reply_str_value -%}
+  {%- set contributorOrcid = repliesMap[[contributorsPath, i, contributorOrcidQUuid]|reply_path]|reply_str_value -%}
+  {%- set contributorRoleAnswerUUID = repliesMap[[contributorsPath, i, contributorRoleQUuid]|reply_path]|reply_str_value -%}
+  {#- Currently, only one role is possible -#}
+  {%- set constributorRoles = [] -%}
+  {%- if contributorRoleAnswerUUID == contributorRoleContactPersonAUuid -%}
+    {%- do constributorRoles.append("contact person") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleDataCollectorAUuid -%}
+    {%- do constributorRoles.append("data collector") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleDataCuratorAUuid -%}
+    {%- do constributorRoles.append("data curator") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleDataManagerAUuid -%}
+    {%- do constributorRoles.append("data manager") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleDistributorAUuid -%}
+    {%- do constributorRoles.append("distributor") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleEditorAUuid -%}
+    {%- do constributorRoles.append("editor") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleProducerAUuid -%}
+    {%- do constributorRoles.append("producer") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleProjectLeaderAUuid -%}
+    {%- do constributorRoles.append("project leader") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleProjectManagerAUuid -%}
+    {%- do constributorRoles.append("project manager") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleProjectMemberAUuid -%}
+    {%- do constributorRoles.append("project member") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleResearcherAUuid -%}
+    {%- do constributorRoles.append("researcher") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleRightsHolderAUuid -%}
+    {%- do constributorRoles.append("rights holder") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleSponsorAUuid -%}
+    {%- do constributorRoles.append("sponsor") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleSupervisorAUuid -%}
+    {%- do constributorRoles.append("supervisor") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleWorkPackageLeaderAUuid -%}
+    {%- do constributorRoles.append("work package leader") -%}
+  {%- elif contributorRoleAnswerUUID == contributorRoleOtherAUuid -%}
+    {%- do constributorRoles.append("other") -%}
+  {%- endif -%}
+  {%- set contributor = {
+    "contributor_id": {
+      "identifier": contributorOrcid,
+      "type": "orcid"
+    },
+    "mbox": contributorEmail,
+    "name": contributorName,
+    "role": constributorRoles
+  } -%}
+  {%- do contributors.append(contributor) -%}
+  {%- if contributorRoleAnswerUUID == contributorRoleContactPersonAUuid -%}
+    {%- do contacts.append(contributor) -%}
+  {%- endif -%}
+{%- endfor -%}
 -%}
+{#- Projects -#}
+{%- set dswProjectNamePath = [adminDetailsCUuid, projectNameQUuid]|reply_path -%}
+{%- set dswProjectName = repliesMap[dswProjectNamePath]|reply_str_value -%}
 {#- maDMP object (according to the schema) -#}
 {%- set madmp = {
   "title": ctx.questionnaireName,
   "description": madmpDescription,
   "language": "eng",
   "dmp_id": madmpDmpId,
+  "contributors": contributors,
   "created": ctx.createdAt|datetime_format("%Y-%m-%d %H:%M:%S"),
   "modified": ctx.updatedAt|datetime_format("%Y-%m-%d %H:%M:%S")
 } -%}
+{%- if contacts|length > 0 -%}
+  {%- do madmp.update({"contact": contacts[0]}) -%}
+{%- endif -%}
