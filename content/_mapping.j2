@@ -21,45 +21,34 @@
 {#- Basic string fiels -#}
 {%- set dswProjectNamePath = [adminDetailsCUuid, projectNameQUuid]|reply_path -%}
 {%- set dswProjectName = repliesMap[dswProjectNamePath]|reply_str_value -%}
-{#- Contributors (list) -#}
-{%- set contributorRoleToText = {
-  contributorRoleContactPersonAUuid: "contact person",
-  contributorRoleDataCuratorAUuid: "curator",
-  contributorRoleDataCollectorAUuid: "collector",
-  contributorRoleDataManagerAUuid: "data manager",
-  contributorRoleDistributorAUuid: "distributor"
-} -%}
-{%- set dswContributorsPath = [adminDetailsCUuid, contributorsQUuid]|reply_path -%}
-{%- set dswContributorsReply = repliesMap[contributorsPath]|reply_int_value -%}
-{%- set dswContributors = [] -%}
-{%- for i in range(nContributors) -%}
-  {%- set dswContributorName = repliesMap[[dswContributorsPath, i, contributorNameQUuid]|reply_path]|reply_str_value -%}
-  {%- set dswContributorRoleAnswerUUID = repliesMap[[dswContributorsPath, i, contributorRoleQUuid]|reply_path]|reply_str_value -%}
-  {%- do dswContributors.append({
-    name: dswContributorName,
-    role: contributorRoleToText[dswContributorRoleAnswerUUID]
-  }) -%}
-{%- endfor -%}
+
 {#- maDMP variables -#}
-{#- - note: this should roughly match the JSON Schema -#}
-{%- set madmpContributors = [
-  {
-    id: "",
-    idType: "",
-    mbox: "",
-    name: "",
-    roles: [""],
-  }
-] -%}
-{# ... #}
-{%- set madmpProject = {
-  title: dswProjectName
+{%- set madmpDescription = "This maDMP has been created using Data Stewardship Wizard and based on knowledge model " ~ ctx.package.name ~ " (" ~ ctx.pId ~ "). The questionnaire used for this DMP is idenfitied by UUID \"" ~ ctx.questionnaireUuid ~ "\"." -%}
+{#- TODO: extract clientId (need adjust engine-backend) -#}
+{%- set madmpDmpId = {
+  "identifier": ctx.questionnaireUuid,
+  "type": "other"
 }
 -%}
-{#- - idea: or should ve construct the JSON object diretly? -#}
+{%- set madmpContributors = [
+  {
+    "id": "",
+    "idType": "",
+    "mbox": "",
+    "name": "",
+    "roles": [""]
+  }
+] -%}
+{%- set madmpProject = {
+  "title": dswProjectName
+}
+-%}
+{#- maDMP object (according to the schema) -#}
 {%- set madmp = {
-  title: "",
-  description: "",
-  language: "eng",
-  contributors: madmpContributors
+  "title": ctx.questionnaireName,
+  "description": madmpDescription,
+  "language": "eng",
+  "dmp_id": madmpDmpId,
+  "created": ctx.createdAt|datetime_format("%Y-%m-%d %H:%M:%S"),
+  "modified": ctx.updatedAt|datetime_format("%Y-%m-%d %H:%M:%S")
 } -%}
