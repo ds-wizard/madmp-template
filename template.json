@@ -2,11 +2,11 @@
   "uuid": "ccf5ce08-c932-4e11-a5fd-c52378a86c20",
   "name": "maDMP (RDA Common Standard)",
   "description": "Machine-actionable DMP according to RDA Common Standard",
-  "allowedKMs": [
+  "allowedPackages": [
     {
       "orgId": "dsw",
       "kmId": "root",
-      "minVersion": "2.0.0",
+      "minVersion": "2.2.0",
       "maxVersion": null
     }
   ],
@@ -32,7 +32,7 @@
       "uuid": "9c7d572e-c273-4323-97a4-ab38f943c33a",
       "name": "maDMP RDF (DSCO)",
       "shortName": "rdf",
-      "icon": "fas fa-share-alt",
+      "icon": "fas fa-file-code",
       "color": "#f15a24",
       "steps": [
         {

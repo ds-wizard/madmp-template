@@ -5,10 +5,9 @@
 {#- Basic DMP metadata -#}
 {#- maDMP variables -#}
 {%- set madmpDescription = "This maDMP has been created using Data Stewardship Wizard and based on knowledge model " ~ ctx.package.name ~ " (" ~ ctx.package.pId ~ "). The questionnaire used for this DMP is identified by UUID \"" ~ ctx.questionnaireUuid ~ "\"." -%}
-{#- TODO: extract clientUrl (need adjust engine-backend) -#}
 {%- set madmpDmpId = {
-  "identifier": ctx.questionnaireUuid,
-  "type": "other"
+  "identifier": ctx.config.clientUrl ~ "/questionnaires/" ~ ctx.questionnaireUuid,
+  "type": "url"
 }
 -%}
 {#- Contributors (list) and contact -#}
