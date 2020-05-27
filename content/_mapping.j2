@@ -3,9 +3,6 @@
 {%- set repliesMap = ctx.questionnaireRepliesMap -%}
 {#- UUIDs -#}
 {%- set adminDetailsCUuid = "1e85da40-bbfc-4180-903e-6c569ed2da38" -%}
-{%- set projectNameQUuid = "f0ef08fd-d733-465c-bc66-5de0b826c41b" -%}
-{%- set grantNumberQUuid = "1ccbd0bb-4263-4240-9dc5-936ef09eef53" -%}
-{%- set projectAbstractQUuid = "22583d74-3c98-4e0a-b363-26d767c88212" -%}
 {%- set contributorsQUuid = "73d686bd-7939-412e-8631-502ee6d9ea7b" -%}
 {%- set contributorNameQUuid = "6155ad47-3d1e-4488-9f2a-742de1e56580" -%}
 {%- set contributorEmailQUuid = "3a2ffc13-6a0e-4976-bb34-14ab6d938348" -%}
@@ -28,6 +25,19 @@
 {%- set contributorRoleSupervisorAUuid = "c6883c1f-6dd8-4c5b-aa7d-b93e4e2d9378" -%}
 {%- set contributorRoleWorkPackageLeaderAUuid = "d24fd64b-6a66-4d22-80f0-2d1aae4a554f" -%}
 {%- set contributorRoleOtherAUuid = "dead02bb-d5b2-4036-9e99-3318f191b3d0" -%}
+{%- set projectsQUuid = "c3dabaaf-c946-4a0d-889c-ede966f97667" -%}
+{%- set projectNameQUuid = "f0ef08fd-d733-465c-bc66-5de0b826c41b" -%}
+{%- set projectAbstractQUuid = "22583d74-3c98-4e0a-b363-26d767c88212" -%}
+{%- set projectStartQUuid = "de84b9b5-bcd0-4954-8370-72ea83916b8c" -%}
+{%- set projectEndQUuid = "cabc6f07-6015-454e-b97a-c34db4ec0c60" -%}
+{%- set projectFundingQUuid = "36a87eac-402d-43fb-a0df-ac5963bdf87d" -%}
+{%- set projectFundingFunderQUuid = "0b12fb8c-ee0f-40c0-9c53-b6826b786a0c" -%}
+{%- set projectFundingStatusQUuid = "54ff3b18-652f-4235-8f9f-3c87e2d63169" -%}
+{%- set projectFundingStatusPlannedAUuid = "59ed0193-8211-4ee8-8d36-0640d99ce870" -%}
+{%- set projectFundingStatusAppliedAUuid = "85fad342-a89d-414b-bc83-286a7417bb78" -%}
+{%- set projectFundingStatusGrantedAUuid = "dcbeab22-d188-4fa0-b50b-5c9d1a2fbefe" -%}
+{%- set projectFundingStatusRejectedAUuid = "8c0c9f28-4672-46ba-a939-48c2c892d790" -%}
+{%- set projectFundingGrantNumberQUuid = "1ccbd0bb-4263-4240-9dc5-936ef09eef53" -%}
 {#- UUID paths -#}
 {#- Basic DMP metadata -#}
 {#- maDMP variables -#}
@@ -88,26 +98,98 @@
       "identifier": contributorOrcid,
       "type": "orcid"
     },
-    "mbox": contributorEmail,
     "name": contributorName,
     "role": constributorRoles
   } -%}
-  {%- do contributors.append(contributor) -%}
-  {%- if contributorRoleAnswerUUID == contributorRoleContactPersonAUuid -%}
-    {%- do contacts.append(contributor) -%}
+  {%- if contributorEmail != "" -%}
+    {%- do contributor.update({"mbox": contributorEmail}) -%}
+  {%- endif -%}
+  {%- if contributorOrcid != "" and contributorName != "" and constributorRoles|length > 0 -%}{# do not use invalid/incomplete #}
+    {%- do contributors.append(contributor) -%}
+
+    {%- if contributorRoleAnswerUUID == contributorRoleContactPersonAUuid and contributorEmail != "" -%}
+      {%- do contacts.append(contributor) -%}
+    {%- endif -%}
   {%- endif -%}
 {%- endfor -%}
 -%}
 {#- Projects -#}
-{%- set dswProjectNamePath = [adminDetailsCUuid, projectNameQUuid]|reply_path -%}
-{%- set dswProjectName = repliesMap[dswProjectNamePath]|reply_str_value -%}
+{%- set projectsPath = [adminDetailsCUuid, projectsQUuid]|reply_path -%}
+{%- set projectsReply = repliesMap[projectsPath].value.value -%}
+{%- set projects = [] -%}
+{%- for i in range(contributorsReply) -%}
+  {%- set projectName = repliesMap[[projectsPath, i, projectNameQUuid]|reply_path]|reply_str_value -%}
+  {%- set projectAbstract = repliesMap[[projectsPath, i, projectAbstractQUuid]|reply_path]|reply_str_value -%}
+  {%- set projectStart = repliesMap[[projectsPath, i, projectStartQUuid]|reply_path]|reply_str_value -%}
+  {%- set projectEnd = repliesMap[[projectsPath, i, projectEndQUuid]|reply_path]|reply_str_value -%}
+
+  {%- set projectFundingPath = [projectsPath, i, projectFundingQUuid]|reply_path -%}
+  {%- set projectFundingReply = repliesMap[projectFundingPath]|reply_int_value -%}
+  {%- set funding = [] -%}
+  {%- for j in range(projectFundingReply) -%}
+    {%- set funderReply = repliesMap[[projectFundingPath, j, projectFundingFunderQUuid]|reply_path] -%}
+    {%- set funderUrl = "" -%}
+    {%- if funderReply and funderReply.value.value.type == "IntegrationValue" -%}
+      {%- set funderUrl = funderReply.value.value.id -%}
+    {%- elif funderReply -%}
+      {%- set funderUrl = funderReply.value.value.value -%}
+    {%- endif -%}
+    {%- set grantNumber = repliesMap[[projectFundingPath, j, projectFundingGrantNumberQUuid]|reply_path]|reply_str_value -%}
+    {%- set fundingStatusAUuid = repliesMap[[projectFundingPath, j, projectFundingStatusQUuid]|reply_path]|reply_str_value -%}
+    {%- set fundingStatus = "" -%}
+    {%- if fundingStatusAUuid == projectFundingStatusPlannedAUuid -%}
+      {%- set fundingStatus = "planned" -%}
+    {%- elif fundingStatusAUuid == projectFundingStatusAppliedAUuid -%}
+      {%- set fundingStatus = "applied" -%}
+    {%- elif fundingStatusAUuid == projectFundingStatusGrantedAUuid -%}
+      {%- set fundingStatus = "granted" -%}
+    {%- elif fundingStatusAUuid == projectFundingStatusRejectedAUuid -%}
+      {%- set fundingStatus = "rejected" -%}
+    {%- endif -%}
+
+    {%- set oneFunding = {
+      "funder_id": {
+        "identifier": funderUrl,
+        "type": "url"
+      },
+      "grant_id": {
+        "identifier": grantNumber,
+        "type": "other"
+      }
+    } -%}
+    {%- if fundingStatus != "" -%}
+      {%- do oneFunding.update({"funding_status": fundingStatus}) -%}
+    {%- endif -%}
+
+    {%- if funderUrl != "" and grantNumber != "" -%}{# do not use invalid/incomplete #}
+      {%- do funding.append(oneFunding) -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- set project = {
+    "title": projectName,
+    "start": projectStart,
+    "end": projectEnd
+  } -%}
+  {%- if projectAbstract != "" -%}
+    {%- do project.update({"description": projectAbstract}) -%}
+  {%- endif -%}
+  {%- if funding|length > 0 -%}
+    {%- do project.update({"funding": funding}) -%}
+  {%- endif -%}
+
+  {%- if projectName != "" and projectStart != "" and projectEnd != "" -%}{# do not use invalid/incomplete #}
+    {%- do projects.append(project) -%}
+  {%- endif -%}
+{%- endfor -%}
 {#- maDMP object (according to the schema) -#}
 {%- set madmp = {
   "title": ctx.questionnaireName,
   "description": madmpDescription,
   "language": "eng",
   "dmp_id": madmpDmpId,
-  "contributors": contributors,
+  "contributor": contributors,
+  "project": projects,
   "created": ctx.createdAt|datetime_format("%Y-%m-%d %H:%M:%S"),
   "modified": ctx.updatedAt|datetime_format("%Y-%m-%d %H:%M:%S")
 } -%}
