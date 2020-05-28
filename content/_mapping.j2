@@ -12,7 +12,7 @@
 -%}
 {#- Contributors (list) and contact -#}
 {%- set contributorsPath = [uuids.adminDetailsCUuid, uuids.contributorsQUuid]|reply_path -%}
-{%- set contributorsReply = repliesMap[contributorsPath].value.value -%}
+{%- set contributorsReply = repliesMap[contributorsPath]|reply_int_value -%}
 {%- set contributors = [] -%}
 {%- set contacts = [] -%}
 {%- for i in range(contributorsReply) -%}
@@ -77,7 +77,7 @@
 -%}
 {#- Projects -#}
 {%- set projectsPath = [uuids.adminDetailsCUuid, uuids.projectsQUuid]|reply_path -%}
-{%- set projectsReply = repliesMap[projectsPath].value.value -%}
+{%- set projectsReply = repliesMap[projectsPath]|reply_int_value -%}
 {%- set projects = [] -%}
 {%- for i in range(contributorsReply) -%}
   {%- set projectName = repliesMap[[projectsPath, i, uuids.projectNameQUuid]|reply_path]|reply_str_value -%}
@@ -152,7 +152,61 @@
 {%- set ethicalIssuesExistYes = false -%}
 {%- set ethicalIssuesDescriptions = [] -%}
 
-{# TODO: non-reference data sets consent #}
+{%- set preexistingPath = [uuids.reusingCUuid, uuids.preexistingQUuid]|reply_path -%}
+{%- set preexistingAUuid = repliesMap[preexistingPath]|reply_str_value -%}
+{%- if preexistingAUuid == uuids.preexistingYesAUuid -%}
+  {%- set usingPreexistingPath = [preexistingPath, uuids.preexistingYesAUuid, uuids.usingPreexistingQUuid]|reply_path -%}
+  {%- set usingPreexistingAUuid = repliesMap[usingPreexistingPath]|reply_str_value -%}
+  {%- if usingPreexistingAUuid == uuids.usingPreexistingYesAUuid -%}
+    {%- set nrefDataPath = [usingPreexistingPath, uuids.usingPreexistingYesAUuid, uuids.nrefDataQUuid]|reply_path -%}
+    {%- set nrefDataReply = repliesMap[nrefDataPath]|reply_int_value -%}
+
+    {%- for i in range(nrefDataReply) -%}
+      {%- set nrefDataNamePath = [nrefDataPath, i, uuids.nrefDataNameQUuid]|reply_path -%}
+      {%- set nrefDataNameReply = repliesMap[nrefDataNamePath] -%}
+      {%- set nrefDataWhere = repliesMap[[nrefDataPath, i, uuids.nrefDataWhereQUuid]|reply_path]|reply_str_value -%}
+      {%- set nrefDataConsentPath = [nrefDataPath, i, uuids.nrefDataConsentQUuid]|reply_path -%}
+      {%- set nrefDataConsentAUuid = repliesMap[nrefDataConsentPath]|reply_str_value -%}
+
+      {%- set name = "(unknown name)" -%}
+      {%- if nrefDataNameReply and nrefDataNameReply.value.value.type == "IntegrationValue" -%}
+        {%- set question = km.entities.questions[questionUuid] -%}
+        {%- set integration = km.entities.integrations[question.integrationUuid] -%}
+        {%- set integrationLink = integration.itemUrl|replace("${id}", nrefDataNameReply.value.value.id) -%}
+        {%- set name = nrefDataNameReply.value.value.value ~ " [" ~ integrationLink ~ "]" -%}
+      {%- elif nrefDataNameReply %}
+        {%- set name = nrefDataNameReply.value.value.value -%}
+      {%- endif -%}
+      {%- if nrefDataWhere -%}
+        {%- set name = name ~ " (" ~ nrefDataWhere ~ ")" -%}
+      {%- endif -%}
+
+      {%- set prefix = "Non-reference dataset " ~ name -%}
+      {%- if nrefDataConsentAUuid == uuids.nrefDataConsentNotPersonalAUuid %}
+        {%- do ethicalIssuesDescriptions.append(prefix ~ " does not need an extension of any consent because it is not personal data.") -%}
+      {%- elif nrefDataConsentAUuid == uuids.nrefDataConsentAnotherLegalAUuid %}
+        {%- do ethicalIssuesDescriptions.append(prefix ~ " does not need an extension of any consent because we will use another legal base for the processing.") -%}
+        {%- set ethicalIssuesExistNrefNo = false -%}
+        {%- set ethicalIssuesExistYes = true -%}
+      {%- elif nrefDataConsentAUuid == uuids.nrefDataConsentCoversAUuid %}
+        {%- do ethicalIssuesDescriptions.append(prefix ~ " - the existing consent covers our reuse.") -%}
+        {%- set ethicalIssuesExistNrefNo = false -%}
+        {%- set ethicalIssuesExistYes = true -%}
+      {%- elif nrefDataConsentAUuid == uuids.nrefDataConsentNewAUuid %}
+        {%- do ethicalIssuesDescriptions.append(prefix ~ " does need a new consent to cover our usage of the data.") -%}
+        {%- set ethicalIssuesExistNrefNo = false -%}
+        {%- set ethicalIssuesExistYes = true -%}
+      {%- elif nrefDataConsentAUuid == uuids.nrefDataConsentOtherAUuid %}
+        {%- set nrefDataConsentOtherPath = [nrefDataConsentPath, uuids.nrefDataConsentOtherAUuid, uuids.nrefDataConsentOtherQUuid]|reply_path -%}
+        {%- set nrefDataConsentOther = repliesMap[nrefDataConsentOtherPath]|reply_str_value %}
+        {%- set suffix = (": " ~ nrefDataConsentOther|dot if nrefDataConsentOther else ".") -%}
+        {%- do ethicalIssuesDescriptions.append(prefix ~ " has special arragements in terms of consent" ~ suffix) -%}
+        {%- set ethicalIssuesExistNrefNo = false -%}
+        {%- set ethicalIssuesExistYes = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endif -%}
 
 {%- set needConsentAUuid = repliesMap[[uuids.creatingCUuid, uuids.needConsentQUuid]|reply_path]|reply_str_value -%}
 {%- if needConsentAUuid == uuids.needConsentNoNotCollectAUuid -%}
@@ -220,6 +274,7 @@
 {%- elif ethicalIssuesExistNo -%}
   {%- set ethicalIssuesExist = "no" -%}
 {%- endif -%}
+{#- TODO: datasets -#}
 
 {%- set ethicalIssuesDescription = ethicalIssuesDescriptions|join(" ") -%}
 {#- maDMP object (according to the schema) -#}
