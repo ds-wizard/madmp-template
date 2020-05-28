@@ -173,12 +173,12 @@
         {%- set question = km.entities.questions[questionUuid] -%}
         {%- set integration = km.entities.integrations[question.integrationUuid] -%}
         {%- set integrationLink = integration.itemUrl|replace("${id}", nrefDataNameReply.value.value.id) -%}
-        {%- set name = nrefDataNameReply.value.value.value ~ " [" ~ integrationLink ~ "]" -%}
+        {%- set name = "\"" ~ nrefDataNameReply.value.value.value ~ "\" [" ~ integrationLink ~ "]" -%}
       {%- elif nrefDataNameReply %}
-        {%- set name = nrefDataNameReply.value.value.value -%}
+        {%- set name = "\"" ~ nrefDataNameReply.value.value.value ~ "\"" -%}
       {%- endif -%}
       {%- if nrefDataWhere -%}
-        {%- set name = name ~ " (" ~ nrefDataWhere ~ ")" -%}
+        {%- set name = "\"" ~ name ~ "\" (" ~ nrefDataWhere ~ ")" -%}
       {%- endif -%}
 
       {%- set prefix = "Non-reference dataset " ~ name -%}
@@ -224,48 +224,56 @@
   {%- do ethicalIssuesDescriptions.append("We will collect consent for our use of the data, and will anonymize the data afterwards for reuse.") -%}
 {%- endif -%}
 
-{%- set legalResonsPath = [uuids.givingAccessCUuid, uuids.legalReasonsQUuid]|reply_path -%}
-{%- set legalResonsAUuid = repliesMap[legalResonsPath]|reply_str_value -%}
-{%- if legalResonsAUuid == uuids.legalReasonsNoAUuid -%}
+{%- set canOpenPath = [uuids.givingAccessCUuid, uuids.canOpenQUuid]|reply_path -%}
+{%- set canOpenAUuid = repliesMap[legalResonsPath]|reply_str_value -%}
+{%- if canOpenAUuid == uuids.canOpenYesAUuid -%}
   {%- set ethicalIssuesExistPrivacyNo = true -%}
-{%- elif legalResonsAUuid == uuids.privacyReasonsYesAUuid -%}
-  {%- set ethicalIssuesExistYes = true -%}
-  {%- do ethicalIssuesDescriptions.append("There privacy reasons so our data can not be open.") -%}
+{%- elif canOpenAUuid == uuids.privacyReasonsYesAUuid -%}
+  {%- set legalResonsPath = [canOpenPath, uuids.privacyReasonsYesAUuid, uuids.legalReasonsQUuid]|reply_path -%}
+  {%- set legalResonsAUuid = repliesMap[legalResonsPath]|reply_str_value -%}
 
-  {%- set legalResonsYesPath = [uuids.givingAccessCUuid, uuids.legalReasonsQUuid, uuids.privacyReasonsYesAUuid]|reply_path -%}
-  {%- set privacyRestrictionsAUuid = repliesMap[[legalResonsYesPath, uuids.privacyRestrictionsQUuid]|reply_path]|reply_str_value -%}
-  {%- set privacyPseudoAUuid = repliesMap[[legalResonsYesPath, uuids.privacyPseudoQUuid]|reply_path]|reply_str_value -%}
-  {%- set privacyAnonAUuid = repliesMap[[legalResonsYesPath, uuids.privacyAnonQUuid]|reply_path]|reply_str_value -%}
-  {%- set privacyAggregationAUuid = repliesMap[[legalResonsYesPath, uuids.privacyAggregationQUuid]|reply_path]|reply_str_value -%}
+  {%- if legalResonsAUuid == uuids.legalReasonsNoAUuid -%}
+    {%- set ethicalIssuesExistPrivacyNo = true -%}
+  {%- elif legalResonsAUuid == uuids.privacyReasonsYesAUuid -%}
+    {%- set ethicalIssuesExistYes = true -%}
+    {%- do ethicalIssuesDescriptions.append("There privacy reasons so our data can not be open.") -%}
 
-  {%- if privacyRestrictionsAUuid == uuids.privacyRestrictionsNoAUuid -%}
-    {%- do ethicalIssuesDescriptions.append("We are not restricted in terms where the data can be stored.") -%}
-  {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesEUAUuid -%}
-    {%- do ethicalIssuesDescriptions.append("Our data must are restricted to stay in EU.") -%}
-  {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesCountryAUuid -%}
-    {%- do ethicalIssuesDescriptions.append("Our data must are restricted to stay in the same country.") -%}
-  {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesInstituteAUuid -%}
-    {%- do ethicalIssuesDescriptions.append("Our data must are restricted to stay in the same institute.") -%}
-  {%- endif -%}
+    {%- set legalResonsYesPath = [uuids.givingAccessCUuid, uuids.legalReasonsQUuid, uuids.privacyReasonsYesAUuid]|reply_path -%}
+    {%- set privacyRestrictionsAUuid = repliesMap[[legalResonsYesPath, uuids.privacyRestrictionsQUuid]|reply_path]|reply_str_value -%}
+    {%- set privacyPseudoAUuid = repliesMap[[legalResonsYesPath, uuids.privacyPseudoQUuid]|reply_path]|reply_str_value -%}
+    {%- set privacyAnonAUuid = repliesMap[[legalResonsYesPath, uuids.privacyAnonQUuid]|reply_path]|reply_str_value -%}
+    {%- set privacyAggregationAUuid = repliesMap[[legalResonsYesPath, uuids.privacyAggregationQUuid]|reply_path]|reply_str_value -%}
 
-  {%- if privacyPseudoAUuid == uuids.privacyPseudoNoAUuid -%}
-    {%- do ethicalIssuesDescriptions.append("We could not make the data more openly available by pseudonymization.") -%}
-  {%- elif privacyPseudoAUuid == uuids.privacyPseudoYesAUuid -%}
-    {%- do ethicalIssuesDescriptions.append("We could make the data more openly available by pseudonymization.") -%}
-  {%- endif -%}
+    {%- if privacyRestrictionsAUuid == uuids.privacyRestrictionsNoAUuid -%}
+      {%- do ethicalIssuesDescriptions.append("We are not restricted in terms where the data can be stored.") -%}
+    {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesEUAUuid -%}
+      {%- do ethicalIssuesDescriptions.append("Our data must are restricted to stay in EU.") -%}
+    {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesCountryAUuid -%}
+      {%- do ethicalIssuesDescriptions.append("Our data must are restricted to stay in the same country.") -%}
+    {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesInstituteAUuid -%}
+      {%- do ethicalIssuesDescriptions.append("Our data must are restricted to stay in the same institute.") -%}
+    {%- endif -%}
 
-  {%- if privacyAnonAUuid == uuids.privacyAnonNoAUuid -%}
-    {%- do ethicalIssuesDescriptions.append("We could not make the data more openly available by anonymization.") -%}
-  {%- elif privacyAnonAUuid == uuids.privacyAnonYesAUuid -%}
-    {%- do ethicalIssuesDescriptions.append("We could make the data more openly available by anonymization.") -%}
-  {%- endif -%}
+    {%- if privacyPseudoAUuid == uuids.privacyPseudoNoAUuid -%}
+      {%- do ethicalIssuesDescriptions.append("We could not make the data more openly available by pseudonymization.") -%}
+    {%- elif privacyPseudoAUuid == uuids.privacyPseudoYesAUuid -%}
+      {%- do ethicalIssuesDescriptions.append("We could make the data more openly available by pseudonymization.") -%}
+    {%- endif -%}
 
-  {%- if privacyAggregationQUuid == uuids.privacyAggregationNoAUuid -%}
-    {%- do ethicalIssuesDescriptions.append("We could not make the data more openly available by data aggregation.") -%}
-  {%- elif privacyAggregationQUuid == uuids.privacyAggregationYesAUuid -%}
-    {%- do ethicalIssuesDescriptions.append("We could make the data more openly available by data aggregation.") -%}
+    {%- if privacyAnonAUuid == uuids.privacyAnonNoAUuid -%}
+      {%- do ethicalIssuesDescriptions.append("We could not make the data more openly available by anonymization.") -%}
+    {%- elif privacyAnonAUuid == uuids.privacyAnonYesAUuid -%}
+      {%- do ethicalIssuesDescriptions.append("We could make the data more openly available by anonymization.") -%}
+    {%- endif -%}
+
+    {%- if privacyAggregationQUuid == uuids.privacyAggregationNoAUuid -%}
+      {%- do ethicalIssuesDescriptions.append("We could not make the data more openly available by data aggregation.") -%}
+    {%- elif privacyAggregationQUuid == uuids.privacyAggregationYesAUuid -%}
+      {%- do ethicalIssuesDescriptions.append("We could make the data more openly available by data aggregation.") -%}
+    {%- endif -%}
   {%- endif -%}
 {%- endif -%}
+
 
 {%- set ethicalIssuesExistNo = ethicalIssuesExistNrefNo and ethicalIssuesExistConsentNo and ethicalIssuesExistPrivacyNo -%}
 {%- set ethicalIssuesExist = "unknown" -%}
@@ -274,6 +282,7 @@
 {%- elif ethicalIssuesExistNo -%}
   {%- set ethicalIssuesExist = "no" -%}
 {%- endif -%}
+
 {#- TODO: datasets -#}
 
 {%- set ethicalIssuesDescription = ethicalIssuesDescriptions|join(" ") -%}
@@ -290,7 +299,11 @@
   "modified": ctx.updatedAt|datetime_format("%Y-%m-%d %H:%M:%S")
 } -%}
 {%- if contacts|length > 0 -%}
-  {%- do madmp.update({"contact": contacts[0]}) -%}
+  {%- do madmp.update({"contact": {
+    "contact_id": contacts[0]["contributor_id"],
+    "mbox": contacts[0]["mbox"],
+    "name": contacts[0]["name"],
+  }}) -%}
 {%- endif -%}
 {%- if ethicalIssuesDescriptions|length > 0 -%}
   {%- do madmp.update({"ethical_issues_description": ethicalIssuesDescription}) -%}
