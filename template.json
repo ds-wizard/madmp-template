@@ -30,7 +30,7 @@
     },
     {
       "uuid": "9c7d572e-c273-4323-97a4-ab38f943c33a",
-      "name": "maDMP RDF (DSCO)",
+      "name": "maDMP RDF (DCSO)",
       "shortName": "rdf",
       "icon": "fas fa-file-code",
       "color": "#f15a24",
@@ -41,6 +41,127 @@
             "template": "content/madmp.rdf.j2",
             "content-type": "application/rdf+xml",
             "extension": "rdf"
+          }
+        }
+      ]
+    },
+    
+    {
+      "uuid": "af4441a5-17af-4a48-91cb-635a4e43afad",
+      "name": "maDMP N3 (DCSO)",
+      "shortName": "n3",
+      "icon": "fas fa-file-alt",
+      "color": "#f15a24",
+      "steps": [
+        {
+          "name": "jinja",
+          "options": {
+            "template": "content/madmp.rdf.j2",
+            "content-type": "application/rdf+xml",
+            "extension": "rdf"
+          }
+        },
+        {
+          "name": "rdflib-convert",
+          "options": {
+            "from": "rdf/xml",
+            "to": "n3"
+          }
+        }
+      ]
+    },
+    {
+      "uuid": "3799b5ef-3a85-4753-b500-250370bf642f",
+      "name": "maDMP Turtle (DCSO)",
+      "shortName": "ttl",
+      "icon": "fas fa-file-alt",
+      "color": "#f15a24",
+      "steps": [
+        {
+          "name": "jinja",
+          "options": {
+            "template": "content/madmp.rdf.j2",
+            "content-type": "application/rdf+xml",
+            "extension": "rdf"
+          }
+        },
+        {
+          "name": "rdflib-convert",
+          "options": {
+            "from": "rdf/xml",
+            "to": "ttl"
+          }
+        }
+      ]
+    },
+    {
+      "uuid": "889566fd-c930-419b-9514-169211f357c5",
+      "name": "maDMP JSON-LD (DCSO)",
+      "shortName": "json-ld",
+      "icon": "fas fa-file-alt",
+      "color": "#f15a24",
+      "steps": [
+        {
+          "name": "jinja",
+          "options": {
+            "template": "content/madmp.rdf.j2",
+            "content-type": "application/rdf+xml",
+            "extension": "rdf"
+          }
+        },
+        {
+          "name": "rdflib-convert",
+          "options": {
+            "from": "rdf/xml",
+            "to": "json-ld"
+          }
+        }
+      ]
+    },
+    {
+      "uuid": "bd8ec4b2-fbea-401f-a898-681fbb03f2be",
+      "name": "maDMP N-Triples (DCSO)",
+      "shortName": "nt",
+      "icon": "fas fa-file-alt",
+      "color": "#f15a24",
+      "steps": [
+        {
+          "name": "jinja",
+          "options": {
+            "template": "content/madmp.rdf.j2",
+            "content-type": "application/rdf+xml",
+            "extension": "rdf"
+          }
+        },
+        {
+          "name": "rdflib-convert",
+          "options": {
+            "from": "rdf/xml",
+            "to": "ntriples"
+          }
+        }
+      ]
+    },
+    {
+      "uuid": "5978ca10-433b-4c53-a810-f98841f497d0",
+      "name": "maDMP Trig (DCSO)",
+      "shortName": "trig",
+      "icon": "fas fa-file-alt",
+      "color": "#f15a24",
+      "steps": [
+        {
+          "name": "jinja",
+          "options": {
+            "template": "content/madmp.rdf.j2",
+            "content-type": "application/rdf+xml",
+            "extension": "rdf"
+          }
+        },
+        {
+          "name": "rdflib-convert",
+          "options": {
+            "from": "rdf/xml",
+            "to": "trig"
           }
         }
       ]

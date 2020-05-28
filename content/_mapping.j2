@@ -4,7 +4,7 @@
 {%- set repliesMap = ctx.questionnaireRepliesMap -%}
 {#- Basic DMP metadata -#}
 {#- maDMP variables -#}
-{%- set madmpDescription = "This maDMP has been created using Data Stewardship Wizard (DSW, ds-wizard.org) and is based on knowledge model " ~ ctx.package.name ~ " (" ~ ctx.package.pId ~ "). The questionnaire used for this DMP is identified by UUID \"" ~ ctx.questionnaireUuid ~ "\" within " ~ ctx.config.clientUrl ~ " DSW instance." -%}
+{%- set madmpDescription = "This maDMP has been created using Data Stewardship Wizard (DSW, ds-wizard.org) and is based on knowledge model " ~ ctx.package.name ~ " (" ~ [ctx.package.organizationId, ctx.package.kmId, ctx.package.version]|join(":") ~ "). The questionnaire used for this DMP is identified by UUID \"" ~ ctx.questionnaireUuid ~ "\" within " ~ ctx.config.clientUrl ~ " DSW instance." -%}
 {%- set madmpDmpId = {
   "identifier": ctx.config.clientUrl ~ "/questionnaires/" ~ ctx.questionnaireUuid,
   "type": "url"
@@ -225,20 +225,20 @@
 {%- endif -%}
 
 {%- set canOpenPath = [uuids.givingAccessCUuid, uuids.canOpenQUuid]|reply_path -%}
-{%- set canOpenAUuid = repliesMap[legalResonsPath]|reply_str_value -%}
+{%- set canOpenAUuid = repliesMap[canOpenPath]|reply_str_value -%}
 {%- if canOpenAUuid == uuids.canOpenYesAUuid -%}
   {%- set ethicalIssuesExistPrivacyNo = true -%}
-{%- elif canOpenAUuid == uuids.privacyReasonsYesAUuid -%}
-  {%- set legalResonsPath = [canOpenPath, uuids.privacyReasonsYesAUuid, uuids.legalReasonsQUuid]|reply_path -%}
+{%- elif canOpenAUuid == uuids.canOpenNoAUuid -%}
+  {%- set legalResonsPath = [canOpenPath, uuids.canOpenNoAUuid, uuids.legalReasonsQUuid]|reply_path -%}
   {%- set legalResonsAUuid = repliesMap[legalResonsPath]|reply_str_value -%}
 
   {%- if legalResonsAUuid == uuids.legalReasonsNoAUuid -%}
     {%- set ethicalIssuesExistPrivacyNo = true -%}
-  {%- elif legalResonsAUuid == uuids.privacyReasonsYesAUuid -%}
+  {%- elif legalResonsAUuid == uuids.legalReasonsYesAUuid -%}
     {%- set ethicalIssuesExistYes = true -%}
-    {%- do ethicalIssuesDescriptions.append("There privacy reasons so our data can not be open.") -%}
+    {%- do ethicalIssuesDescriptions.append("There are privacy reasons so our data can not be open.") -%}
 
-    {%- set legalResonsYesPath = [uuids.givingAccessCUuid, uuids.legalReasonsQUuid, uuids.privacyReasonsYesAUuid]|reply_path -%}
+    {%- set legalResonsYesPath = [uuids.givingAccessCUuid, uuids.legalReasonsQUuid, uuids.legalReasonsYesAUuid]|reply_path -%}
     {%- set privacyRestrictionsAUuid = repliesMap[[legalResonsYesPath, uuids.privacyRestrictionsQUuid]|reply_path]|reply_str_value -%}
     {%- set privacyPseudoAUuid = repliesMap[[legalResonsYesPath, uuids.privacyPseudoQUuid]|reply_path]|reply_str_value -%}
     {%- set privacyAnonAUuid = repliesMap[[legalResonsYesPath, uuids.privacyAnonQUuid]|reply_path]|reply_str_value -%}
@@ -247,29 +247,29 @@
     {%- if privacyRestrictionsAUuid == uuids.privacyRestrictionsNoAUuid -%}
       {%- do ethicalIssuesDescriptions.append("We are not restricted in terms where the data can be stored.") -%}
     {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesEUAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("Our data must are restricted to stay in EU.") -%}
+      {%- do ethicalIssuesDescriptions.append("Our data are restricted to stay in EU.") -%}
     {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesCountryAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("Our data must are restricted to stay in the same country.") -%}
+      {%- do ethicalIssuesDescriptions.append("Our data are restricted to stay in the same country.") -%}
     {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesInstituteAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("Our data must are restricted to stay in the same institute.") -%}
+      {%- do ethicalIssuesDescriptions.append("Our data are restricted to stay in the same institute.") -%}
     {%- endif -%}
 
     {%- if privacyPseudoAUuid == uuids.privacyPseudoNoAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("We could not make the data more openly available by pseudonymization.") -%}
+      {%- do ethicalIssuesDescriptions.append("We cannot make the data more openly available by pseudonymization.") -%}
     {%- elif privacyPseudoAUuid == uuids.privacyPseudoYesAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("We could make the data more openly available by pseudonymization.") -%}
+      {%- do ethicalIssuesDescriptions.append("We can make the data more openly available by pseudonymization.") -%}
     {%- endif -%}
 
     {%- if privacyAnonAUuid == uuids.privacyAnonNoAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("We could not make the data more openly available by anonymization.") -%}
+      {%- do ethicalIssuesDescriptions.append("We cannot make the data more openly available by anonymization.") -%}
     {%- elif privacyAnonAUuid == uuids.privacyAnonYesAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("We could make the data more openly available by anonymization.") -%}
+      {%- do ethicalIssuesDescriptions.append("We can make the data more openly available by anonymization.") -%}
     {%- endif -%}
 
     {%- if privacyAggregationQUuid == uuids.privacyAggregationNoAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("We could not make the data more openly available by data aggregation.") -%}
+      {%- do ethicalIssuesDescriptions.append("We cannot make the data more openly available by data aggregation.") -%}
     {%- elif privacyAggregationQUuid == uuids.privacyAggregationYesAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("We could make the data more openly available by data aggregation.") -%}
+      {%- do ethicalIssuesDescriptions.append("We can make the data more openly available by data aggregation.") -%}
     {%- endif -%}
   {%- endif -%}
 {%- endif -%}
@@ -283,17 +283,143 @@
   {%- set ethicalIssuesExist = "no" -%}
 {%- endif -%}
 
-{#- TODO: datasets -#}
+{#- Datasets -#}
+{%- set datasetsPath = [uuids.preservingCUuid, uuids.producingQUuid]|reply_path -%}
+{%- set datasetsReply = repliesMap[datasetsPath]|reply_int_value -%}
 {%- set datasets = [] -%}
-{%- do datasets.append({
-  "dataset_id": {
-      "identifier": "TODO",
-      "type": "other"
-  },
-  "title": "WIP",
-  "personal_data": "unknown",
-  "sensitive_data": "unknown"
-}) -%}
+{%- for i in range(datasetsReply) -%}
+  {%- set datasetName = repliesMap[[datasetsPath, i, uuids.producingNameQUuid]|reply_path]|reply_str_value -%}
+  {%- set datasetDesciption = repliesMap[[datasetsPath, i, uuids.producingDescriptionQUuid]|reply_path]|reply_str_value -%}
+  {%- set datasetPersonalAUuid = repliesMap[[datasetsPath, i, uuids.producingPersonalQUuid]|reply_path]|reply_str_value -%}
+  {%- set datasetSensitiveAUuid = repliesMap[[datasetsPath, i, uuids.producingSensitiveQUuid]|reply_path]|reply_str_value -%}
+
+  {%- if datasetName == "" -%}
+    {%- set datasetName = "(unnamed dataset)" -%}
+  {%- endif -%}
+  {%- set personalData = "unknown" -%}
+  {%- if datasetPersonalAUuid == uuids.producingPersonalNoAUuid -%}
+    {%- set personalData = "no" -%}
+  {%- elif datasetPersonalAUuid == uuids.producingPersonalYesAUuid -%}
+    {%- set personalData = "yes" -%}
+  {%- endif -%}
+  {%- set sensitiveData = "unknown" -%}
+  {%- if datasetSensitiveAUuid == uuids.producingSensitiveNoAUuid -%}
+    {%- set sensitiveData = "no" -%}
+  {%- elif datasetSensitiveAUuid == uuids.producingSensitiveYesAUuid -%}
+    {%- set sensitiveData = "yes" -%}
+  {%- endif -%}
+
+  {%- set identifiers = [] -%}
+  {%- set identifiersPath = [datasetsPath, i, uuids.producingIdsQUuid]|reply_path -%}
+  {%- set identifiersReply = repliesMap[identifiersPath]|reply_int_value -%}
+  {%- for j in range(identifiersReply) -%}
+    {%- set idTypePath = [identifiersPath, j, uuids.producingIdsTypeQUuid]|reply_path -%}
+    {%- set idTypeAUuid = repliesMap[idTypePath]|reply_str_value -%}
+    {%- set idIdentifierPath = [identifiersPath, j, uuids.producingIdsIdQUuid]|reply_path -%}
+    {%- set idIdentifier = repliesMap[idIdentifierPath]|reply_str_value -%}
+    {%- set idType = "other" -%}
+    {%- if idTypeAUuid == uuids.producingIdsTypeHandleAUuid -%}
+      {%- set idType = "handle" -%}
+    {%- elif idTypeAUuid == uuids.producingIdsTypeDoiAUuid -%}
+      {%- set idType = "doi" -%}
+    {%- elif idTypeAUuid == uuids.producingIdsTypeArkAUuid -%}
+      {%- set idType = "ark" -%}
+    {%- elif idTypeAUuid == uuids.producingIdsTypeUrlAUuid -%}
+      {%- set idType = "url" -%}
+    {%- elif idTypeAUuid == uuids.producingIdsTypeOtherAUuid -%}
+      {%- set idType = "other" -%}
+    {%- endif -%}
+
+    {%- if idIdentifier -%}
+      {%- do identifiers.append({
+        "identifier": idIdentifier, 
+        "type": idType
+      }) -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- set distributions = [] -%}
+  {%- set publishedPath = [datasetsPath, i, uuids.publishedQUuid]|reply_path -%}
+  {%- set publishedAUuid = repliesMap[publishedPath]|reply_str_value -%}
+  {%- if publishedAUuid == uuids.publishedYesAUuid -%}
+    {%- set distributionsPath = [publishedPath, uuids.publishedYesAUuid, uuids.distrosQUuid]|reply_path -%}
+    {%- set distributionsReply = repliesMap[distributionsPath]|reply_int_value -%}
+    {%- for j in range(distributionsReply) -%}
+      {%- set distroAccessPath = [distributionsPath, j, uuids.distroAccessQUuid]|reply_path -%}
+      {%- set distroAccessAUuid = repliesMap[distroAccessPath]|reply_str_value -%}
+
+      {%- set distroAccess = "" -%}
+      {%- if distroAccessAUuid == uuids.distroAccessOpenAUuid -%}
+        {%- set distroAccess = "open" -%}
+      {%- elif distroAccessAUuid == uuids.distroAccessSharedAUuid -%}
+        {%- set distroAccess = "shared" -%}
+      {%- elif distroAccessAUuid == uuids.distroAccessClosedAUuid -%}
+        {%- set distroAccess = "closed" -%}
+      {%- endif -%}
+
+      {%- set licenses = [] -%}
+      {%- set distroLicensesPath = [distributionsPath, j, uuids.distroLicensesQUuid]|reply_path -%}
+      {%- set distroLicensesReply = repliesMap[distroLicensesPath]|reply_int_value -%}
+      {%- for k in range(distroLicensesReply) -%}
+        {%- set distroLicensesWhatPath = [distroLicensesPath, k, uuids.distroLicensesWhatQUuid]|reply_path -%}
+        {%- set distroLicensesWhatAUuid = repliesMap[distroLicensesWhatPath]|reply_str_value -%}
+        {%- set distroLicensesStartPath = [distroLicensesPath, k, uuids.distroLicensesStartQUuid]|reply_path -%}
+        {%- set distroLicensesStart = repliesMap[distroLicensesStartPath]|reply_str_value -%}
+
+        {%- set licenseRef = "" -%}
+        {%- if distroLicensesWhatAUuid == uuids.distroLicensesWhatCC0AUuid -%}
+          {%- set licenseRef = "https://creativecommons.org/publicdomain/zero/1.0/" -%}
+        {%- elif distroLicensesWhatAUuid == uuids.distroLicensesWhatCCBYAUuid -%}
+          {%- set licenseRef = "https://creativecommons.org/licenses/by/4.0/" -%}
+        {%- elif distroLicensesWhatAUuid == uuids.distroLicensesWhatOtherAUuid -%}
+          {%- set licenseOtherPath = [distroLicensesWhatPath, uuids.distroLicensesWhatOtherAUuid, uuids.distroLicensesWhatOtherLinkQUuid]|reply_path -%}
+          {%- set licenseOtherLink = repliesMap[licenseOtherPath]|reply_str_value -%}
+          {%- set licenseRef = licenseOtherLink -%}
+        {%- endif -%}
+
+        {%- set license = {
+          "license_ref": licenseRef,
+          "start_date": distroLicensesStart
+        } -%}
+        {%- if licenseRef != "" and distroLicensesStart != "" -%}
+          {%- do licenses.append(license) -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- set distribution = {
+        "title": datasetName,
+        "data_access": distroAccess
+      } -%}
+      {%- if licenses|length > 0 -%}
+        {%- do distribution.update({"license": licenses}) -%}
+      {%- endif -%}
+      {%- if distroAccess != "" -%}
+        {%- do distributions.append(distribution) -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+
+
+  {%- set dataset = {
+    "dataset_id": {
+        "identifier": "",
+        "type": "other"
+    },
+    "title": datasetName,
+    "personal_data": personalData,
+    "sensitive_data": sensitiveData
+  } -%}
+  {%- if datasetDesciption -%}
+    {%- do dataset.update({"description": datasetDesciption}) -%}
+  {%- endif -%}
+  {%- if distributions|length > 0 -%}
+    {%- do dataset.update({"distribution": distributions}) -%}
+  {%- endif -%}
+  {%- if identifiers|length > 0 -%}{# currently just one ID #}
+    {%- do dataset.update({"dataset_id": identifiers[0]}) -%}
+  {%- endif -%}
+  {%- do datasets.append(dataset) -%}
+{%- endfor -%}
 
 {%- set ethicalIssuesDescription = ethicalIssuesDescriptions|join(" ") -%}
 {#- DMP internal object -#}
