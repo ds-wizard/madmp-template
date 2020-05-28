@@ -284,10 +284,20 @@
 {%- endif -%}
 
 {#- TODO: datasets -#}
+{%- set datasets = [] -%}
+{%- do datasets.append({
+  "dataset_id": {
+      "identifier": "TODO",
+      "type": "other"
+  },
+  "title": "WIP",
+  "personal_data": "unknown",
+  "sensitive_data": "unknown"
+}) -%}
 
 {%- set ethicalIssuesDescription = ethicalIssuesDescriptions|join(" ") -%}
-{#- maDMP object (according to the schema) -#}
-{%- set madmp = {
+{#- DMP internal object -#}
+{%- set dmp = {
   "title": ctx.questionnaireName,
   "description": madmpDescription,
   "language": "eng",
@@ -295,16 +305,19 @@
   "contributor": contributors,
   "project": projects,
   "ethical_issues_exist": ethicalIssuesExist,
-  "created": ctx.createdAt|datetime_format("%Y-%m-%d %H:%M:%S"),
-  "modified": ctx.updatedAt|datetime_format("%Y-%m-%d %H:%M:%S")
+  "dataset": datasets,
+  "created": ctx.createdAt|datetime_format("%Y-%m-%dT%H:%M:%SZ"),
+  "modified": ctx.updatedAt|datetime_format("%Y-%m-%dT%H:%M:%SZ")
 } -%}
 {%- if contacts|length > 0 -%}
-  {%- do madmp.update({"contact": {
+  {%- do dmp.update({"contact": {
     "contact_id": contacts[0]["contributor_id"],
     "mbox": contacts[0]["mbox"],
     "name": contacts[0]["name"],
   }}) -%}
 {%- endif -%}
 {%- if ethicalIssuesDescriptions|length > 0 -%}
-  {%- do madmp.update({"ethical_issues_description": ethicalIssuesDescription}) -%}
+  {%- do dmp.update({"ethical_issues_description": ethicalIssuesDescription}) -%}
 {%- endif -%}
+{#- top-level maDMP object (according to the schema) -#}
+{%- set madmp = { "dmp": dmp } -%}
