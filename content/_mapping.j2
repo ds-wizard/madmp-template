@@ -4,7 +4,7 @@
 {%- set repliesMap = ctx.questionnaireRepliesMap -%}
 {#- Basic DMP metadata -#}
 {#- maDMP variables -#}
-{%- set madmpDescription = "This maDMP has been created using Data Stewardship Wizard and based on knowledge model " ~ ctx.package.name ~ " (" ~ ctx.package.pId ~ "). The questionnaire used for this DMP is identified by UUID \"" ~ ctx.questionnaireUuid ~ "\"." -%}
+{%- set madmpDescription = "This maDMP has been created using Data Stewardship Wizard (DSW, ds-wizard.org) and is based on knowledge model " ~ ctx.package.name ~ " (" ~ ctx.package.pId ~ "). The questionnaire used for this DMP is identified by UUID \"" ~ ctx.questionnaireUuid ~ "\" within " ~ ctx.config.clientUrl ~ " DSW instance." -%}
 {%- set madmpDmpId = {
   "identifier": ctx.config.clientUrl ~ "/questionnaires/" ~ ctx.questionnaireUuid,
   "type": "url"
