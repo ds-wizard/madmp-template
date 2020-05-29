@@ -30,17 +30,17 @@
     },
     {
       "uuid": "9c7d572e-c273-4323-97a4-ab38f943c33a",
-      "name": "maDMP RDF (DCSO)",
-      "shortName": "rdf",
+      "name": "maDMP TTL (DCSO)",
+      "shortName": "ttl",
       "icon": "fas fa-file-code",
       "color": "#f15a24",
       "steps": [
         {
           "name": "jinja",
           "options": {
-            "template": "content/madmp.rdf.j2",
-            "content-type": "application/rdf+xml",
-            "extension": "rdf"
+            "template": "content/madmp.ttl.j2",
+            "content-type": "text/ttl",
+            "extension": "ttl"
           }
         }
       ]
@@ -56,15 +56,15 @@
         {
           "name": "jinja",
           "options": {
-            "template": "content/madmp.rdf.j2",
-            "content-type": "application/rdf+xml",
-            "extension": "rdf"
+            "template": "content/madmp.ttl.j2",
+            "content-type": "text/ttl",
+            "extension": "ttl"
           }
         },
         {
           "name": "rdflib-convert",
           "options": {
-            "from": "rdf/xml",
+            "from": "ttl",
             "to": "n3"
           }
         }
@@ -72,24 +72,24 @@
     },
     {
       "uuid": "3799b5ef-3a85-4753-b500-250370bf642f",
-      "name": "maDMP Turtle (DCSO)",
-      "shortName": "ttl",
+      "name": "maDMP RDF/XML (DCSO)",
+      "shortName": "rdf",
       "icon": "fas fa-file-alt",
       "color": "#f15a24",
       "steps": [
         {
           "name": "jinja",
           "options": {
-            "template": "content/madmp.rdf.j2",
-            "content-type": "application/rdf+xml",
-            "extension": "rdf"
+            "template": "content/madmp.ttl.j2",
+            "content-type": "text/ttl",
+            "extension": "ttl"
           }
         },
         {
           "name": "rdflib-convert",
           "options": {
-            "from": "rdf/xml",
-            "to": "ttl"
+            "from": "ttl",
+            "to": "rdf/xml"
           }
         }
       ]
@@ -104,15 +104,15 @@
         {
           "name": "jinja",
           "options": {
-            "template": "content/madmp.rdf.j2",
-            "content-type": "application/rdf+xml",
-            "extension": "rdf"
+            "template": "content/madmp.ttl.j2",
+            "content-type": "text/ttl",
+            "extension": "ttl"
           }
         },
         {
           "name": "rdflib-convert",
           "options": {
-            "from": "rdf/xml",
+            "from": "ttl",
             "to": "json-ld"
           }
         }
@@ -128,15 +128,15 @@
         {
           "name": "jinja",
           "options": {
-            "template": "content/madmp.rdf.j2",
-            "content-type": "application/rdf+xml",
-            "extension": "rdf"
+            "template": "content/madmp.ttl.j2",
+            "content-type": "text/ttl",
+            "extension": "ttl"
           }
         },
         {
           "name": "rdflib-convert",
           "options": {
-            "from": "rdf/xml",
+            "from": "ttl",
             "to": "ntriples"
           }
         }
@@ -152,15 +152,15 @@
         {
           "name": "jinja",
           "options": {
-            "template": "content/madmp.rdf.j2",
-            "content-type": "application/rdf+xml",
-            "extension": "rdf"
+            "template": "content/madmp.ttl.j2",
+            "content-type": "text/ttl",
+            "extension": "ttl"
           }
         },
         {
           "name": "rdflib-convert",
           "options": {
-            "from": "rdf/xml",
+            "from": "ttl",
             "to": "trig"
           }
         }
