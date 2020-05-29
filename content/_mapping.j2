@@ -183,9 +183,9 @@
 
       {%- set prefix = "Non-reference dataset " ~ name -%}
       {%- if nrefDataConsentAUuid == uuids.nrefDataConsentNotPersonalAUuid %}
-        {%- do ethicalIssuesDescriptions.append(prefix ~ " does not need an extension of any consent because it is not personal data.") -%}
+        {%- do ethicalIssuesDescriptions.append(prefix ~ " does not need an extension of consent because it does not contain personal data.") -%}
       {%- elif nrefDataConsentAUuid == uuids.nrefDataConsentAnotherLegalAUuid %}
-        {%- do ethicalIssuesDescriptions.append(prefix ~ " does not need an extension of any consent because we will use another legal base for the processing.") -%}
+        {%- do ethicalIssuesDescriptions.append(prefix ~ " does not need an extension of consent because we will use another legal base for the processing.") -%}
         {%- set ethicalIssuesExistNrefNo = false -%}
         {%- set ethicalIssuesExistYes = true -%}
       {%- elif nrefDataConsentAUuid == uuids.nrefDataConsentCoversAUuid %}
@@ -193,7 +193,7 @@
         {%- set ethicalIssuesExistNrefNo = false -%}
         {%- set ethicalIssuesExistYes = true -%}
       {%- elif nrefDataConsentAUuid == uuids.nrefDataConsentNewAUuid %}
-        {%- do ethicalIssuesDescriptions.append(prefix ~ " does need a new consent to cover our usage of the data.") -%}
+        {%- do ethicalIssuesDescriptions.append(prefix ~ " needs a new consent to cover our usage of the data.") -%}
         {%- set ethicalIssuesExistNrefNo = false -%}
         {%- set ethicalIssuesExistYes = true -%}
       {%- elif nrefDataConsentAUuid == uuids.nrefDataConsentOtherAUuid %}
@@ -215,10 +215,10 @@
   {%- set ethicalIssuesExistConsentNo = true -%}
 {%- elif needConsentAUuid == uuids.needConsentYesSpecificAUuid -%}
   {%- set ethicalIssuesExistYes = true -%}
-  {%- do ethicalIssuesDescriptions.append("We will collect consent for our specific use of the newly collected personal data.") -%}
+  {%- do ethicalIssuesDescriptions.append("We will collect consent only for our own use of the newly collected personal data.") -%}
 {%- elif needConsentAUuid == uuids.needConsentYesReuseAUuid -%}
   {%- set ethicalIssuesExistYes = true -%}
-  {%- do ethicalIssuesDescriptions.append("We will collect consent for the newly collected personal data as well as reuse of the data.") -%}
+  {%- do ethicalIssuesDescriptions.append("We will collect consent for our use of the newly collected personal data as well as for future reuse of the data.") -%}
 {%- elif needConsentAUuid == uuids.needConsentYesAnonymizeAUuid -%}
   {%- set ethicalIssuesExistYes = true -%}
   {%- do ethicalIssuesDescriptions.append("We will collect consent for our use of the data, and will anonymize the data afterwards for reuse.") -%}
@@ -245,13 +245,13 @@
     {%- set privacyAggregationAUuid = repliesMap[[legalReasonsYesPath, uuids.privacyAggregationQUuid]|reply_path]|reply_str_value -%}
 
     {%- if privacyRestrictionsAUuid == uuids.privacyRestrictionsNoAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("We are not restricted in terms where the data can be stored.") -%}
+      {%- do ethicalIssuesDescriptions.append("There are no restrictions where the data can be stored.") -%}
     {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesEUAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("Our data are restricted to stay in EU.") -%}
+      {%- do ethicalIssuesDescriptions.append("Our data must stay in EU.") -%}
     {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesCountryAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("Our data are restricted to stay in the same country.") -%}
+      {%- do ethicalIssuesDescriptions.append("Our data must stay in the same country.") -%}
     {%- elif privacyRestrictionsAUuid == uuids.privacyRestrictionsYesInstituteAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("Our data are restricted to stay in the same institute.") -%}
+      {%- do ethicalIssuesDescriptions.append("Our data must stay in the same institute.") -%}
     {%- endif -%}
 
     {%- if privacyPseudoAUuid == uuids.privacyPseudoNoAUuid -%}
@@ -267,9 +267,9 @@
     {%- endif -%}
 
     {%- if privacyAggregationQUuid == uuids.privacyAggregationNoAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("We cannot make the data more openly available by data aggregation.") -%}
+      {%- do ethicalIssuesDescriptions.append("We cannot make the data more openly available through data aggregation.") -%}
     {%- elif privacyAggregationQUuid == uuids.privacyAggregationYesAUuid -%}
-      {%- do ethicalIssuesDescriptions.append("We can make the data more openly available by data aggregation.") -%}
+      {%- do ethicalIssuesDescriptions.append("We can make the data more openly available through data aggregation.") -%}
     {%- endif -%}
   {%- endif -%}
 {%- endif -%}
