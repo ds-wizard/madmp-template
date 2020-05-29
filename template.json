@@ -29,6 +29,23 @@
       ]
     },
     {
+      "uuid": "cd62f85c-c51a-4846-ac09-e3b7046ec5ab",
+      "name": "maDMP for DMPTool",
+      "shortName": "json",
+      "icon": "fas fa-passport",
+      "color": "#f15a24",
+      "steps": [
+        {
+          "name": "jinja",
+          "options": {
+            "template": "content/dmptool.json.j2",
+            "content-type": "application/json",
+            "extension": "json"
+          }
+        }
+      ]
+    },
+    {
       "uuid": "9c7d572e-c273-4323-97a4-ab38f943c33a",
       "name": "maDMP TTL (DCSO)",
       "shortName": "ttl",
