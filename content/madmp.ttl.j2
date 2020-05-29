@@ -27,10 +27,10 @@
 @base <https://w3id.org/dcso/ns/core> .
 
 ex:dmp_1 a dcso:DMP ;
-         terms:title "{{ mapping.madmp["dmp"]["title"]|tojson }}" .
+         terms:title {{ mapping.madmp["dmp"]["title"]|tojson }} .
          dcso:ethical_issues_exist "{{ mapping.madmp["dmp"]["ethical_issues_exist"] }}" ;
          terms:created "{{ mapping.madmp["dmp"]["created"] }}" ;
-         terms:description "{{ mapping.madmp["dmp"]["description"]|tojson }}" ;
+         terms:description {{ mapping.madmp["dmp"]["description"]|tojson }} ;
          terms:language dcs-lang:{{ mapping.madmp["dmp"]["language"] }} ;
          terms:modified "{{ mapping.madmp["dmp"]["modified"] }}" ;
 
