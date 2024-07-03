@@ -1,6 +1,6 @@
 {
   "organizationId": "dsw",
-  "templateId": "rda-madmp",
+  "templateId": "madmp-template",
   "version": "1.16.0",
   "name": "maDMP (RDA DMP Common Standard)",
   "description": "Machine-actionable DMP according to RDA Common Standard",
