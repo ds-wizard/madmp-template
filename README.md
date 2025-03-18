@@ -28,6 +28,10 @@ This document template for DSW is available as open-source via GitHub Repository
 
 ## Changelog
 
+### 1.22.0
+
+- Added ORCID integration
+
 ### 1.21.0
 
 - Improved Authors of the DMP
