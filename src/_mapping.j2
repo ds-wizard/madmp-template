@@ -46,19 +46,32 @@
   {%- for role in contributorRoleChoices -%}
     {%- do contributorRoles.append(contributorsMap.get(role, "other")) -%}
   {%- endfor -%}
-  {%- if contributorOrcidReply and contributorOrcidReply.value.value.type == "IntegrationType"-%}
+  {%- if not contributorOrcidReply -%}
+      {%- set contributor = {
+    "contributor_id": {
+      "identifier": i,
+      "type": "other"
+    }
+    } -%}
+  {%- elif contributorOrcidReply.value.value.type == "IntegrationType"-%}
     {%- set contributorOrcid = contributorOrcidReply.value.value.id -%}
-  {%- elif contributorOrcidReply -%}
-    {%- set contributorOrcid = contributorOrcidReply.value.value.value -%}
-  {%- endif -%}
-  {%- set contributor = {
+      {%- set contributor = {
     "contributor_id": {
       "identifier": contributorOrcid|default(""),
       "type": "orcid"
-    },
-    "name": contributorName|default(""),
-    "role": contributorRoles|sort
+    }
+    } -%}
+  {%- else -%}
+    {%- set contributorOrcid = contributorOrcidReply.value.value.value -%}
+      {%- set contributor = {
+    "contributor_id": {
+      "identifier": contributorOrcid|default(""),
+      "type": "orcid"
+    }
   } -%}
+  {%- endif -%}
+  {%- do contributor.update({"name": contributorName|default("")}) -%}
+  {%- do contributor.update({"role": contributorRoles|sort}) -%}
   {%- if contributorEmail != "" -%}
     {%- do contributor.update({"mbox": contributorEmail}) -%}
   {%- endif -%}
