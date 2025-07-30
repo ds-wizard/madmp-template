@@ -31,7 +31,7 @@ This document template for DSW is available as open-source via GitHub Repository
 ### 1.23.0
 
 - Fix ethical issues related to reuse of non-reference datasets
-- Updated minimum required version of DSW Common Knowledge Model to 2.6.11
+- Updated minimum required version of compatible knowledge models to 2.6.11
 - Updated README with the latest link to the DCS Ontology
 
 ### 1.22.0
