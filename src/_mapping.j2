@@ -1,4 +1,5 @@
 {#- This file contains the mapping with dsw:root KM -#}
+{% import "src/macros.j2" as macros with context %}
 {%- import "src/_uuids.j2" as uuids with context -%}
 {%- import "src/globals.j2" as globals with context -%}
 {%- set km = ctx.knowledgeModel -%}
@@ -184,7 +185,7 @@
       {%- set question = km.entities.questions[uuids.nrefDataNameQUuid] -%}
       {%- set integration = km.entities.integrations[question.integrationUuid] -%}
       {%- set integrationLink = integration.itemUrl|replace("${id}", nrefDataNameReply.value.value.id) -%}
-      {%- set name = "\"" ~ nrefDataNameReply.value.value.value ~ "\" [" ~ integrationLink ~ "]" -%}
+      {%- set name = "\"" ~ macros.integrationValue(nrefDataNameReply) ~ "\" [" ~ integrationLink ~ "]" -%}
     {%- elif nrefDataNameReply %}
       {%- set name = "\"" ~ nrefDataNameReply.value.value.value ~ "\"" -%}
     {%- endif -%}
