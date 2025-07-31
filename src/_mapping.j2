@@ -227,7 +227,7 @@
       {%- do ethicalIssuesDescriptions.append(prefix ~ " has been ethically approved and no new approval is needed, as the existing ethical approval under research ethics laws covers our intended reuse of the data.") -%}
       {%- do ethicalIssues.append("nref-ethical-approval") -%}
     {%- elif nrefDataEthicalAppAUuid == uuids.nrefDataEthicalAppExtensionAUuid -%}
-      {%- do ethicalIssuesDescriptions.append(prefix ~ " has been ethically approved and an extension of the existing ethical approval under research ethics laws will be needed for the intended reuse of the data..") -%}
+      {%- do ethicalIssuesDescriptions.append(prefix ~ " has been ethically approved and an extension of the existing ethical approval under research ethics laws will be needed for the intended reuse of the data.") -%}
       {%- do ethicalIssues.append("nref-ethical-approval") -%}
     {%- elif nrefDataEthicalAppAUuid == uuids.nrefDataEthicalAppNewAUuid -%}
       {%- do ethicalIssuesDescriptions.append(prefix ~ " has been ethically approved but new ethical approval under research ethics laws will be required to cover our intended use of the data.") -%}
