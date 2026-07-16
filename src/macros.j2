@@ -1,65 +1,96 @@
-{%- macro integrationOrcid(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- if reply.value.value.raw -%}
-      {{ reply.value.value.raw["orcid-id"] }}
-    {%- else -%}
-      {# Extract ORCID number from the value string #}
-      {%- set value = reply.value.value.value %}
-      {%- set orcid = value.split('ORCID:')[-1].strip().split()[0]|replace("**", "")|markdown|replace("<p>", "")|replace("</p>", "") if 'ORCID:' in value else None %}
-      {%- if orcid and orcid|length >= 15 -%}
-        {{ orcid }}
-      {%- endif -%}
+{#-
+  Helpers for working with replies produced by the `extract_replies` filter.
+
+  Every macro takes a reply object, which is either `none` (question left
+  unanswered) or an object with `_value`. Integration questions additionally
+  have `_raw` holding the data of the picked item; `_raw` is missing (or `none`)
+  when the value was typed in by hand instead of picked from the integration.
+
+  Extracted replies carry the plain string value only, so the text helpers use
+  `_path` to look the original reply object up in the document context, which
+  offers the proper Markdown handling. `dc` comes from `_mapping.j2` via the
+  context of the import.
+
+  The macros render with autoescaping turned off: they produce plain text
+  destined for `tojson`, not for HTML, and escaping it here would leak entities
+  such as `&amp;` into the resulting JSON.
+
+  Note that a macro always hands its result back as `Markup`, even though the
+  body itself is not escaped. Mixing such a result with ordinary strings in
+  `join` or `~` makes Jinja escape the ordinary ones, which would put `&#34;`
+  and friends in the output. Where the result is combined with other text, run
+  it through `"%s"|format(...)` first to get a plain string back.
+-#}
+
+{#- Plain-text rendering of a (possibly Markdown) string reply. -#}
+{%- macro plain(reply) -%}
+  {%- autoescape false -%}
+    {%- if reply -%}
+      {%- set r = dc.project.replies.get(reply._path) -%}
+      {{- r.markdown_plain if r else reply._value -}}
     {%- endif -%}
-  {%- elif reply and reply.value.value.type == "PlainType" -%}
-   {{ reply.value.value.value }}
-  {%- endif -%}
+  {%- endautoescape -%}
 {%- endmacro -%}
 
-{%- macro integrationFairSharing(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- if reply.value.value.raw -%}
-      {%- set replyObject = reply.value.value.raw -%}
-      {%- if replyObject.doi -%}
-        "{{ replyObject.name }} (https://doi.org/{{ replyObject.doi }})"
+{#-
+  Display value of an integration reply, i.e. the first line of the item without
+  the Markdown decorations and the trailing logo.
+-#}
+{%- macro integration_plain(reply) -%}
+  {%- autoescape false -%}
+    {%- if reply -%}
+      {%- set r = dc.project.replies.get(reply._path) -%}
+      {{- r.item_title if r else reply._value.rsplit(" ![]")[0] -}}
+    {%- endif -%}
+  {%- endautoescape -%}
+{%- endmacro -%}
+
+{#- ORCID iD, taken from the integration data or parsed out of a hand-written reply. -#}
+{%- macro orcid_id(reply) -%}
+  {%- autoescape false -%}
+    {%- if reply -%}
+      {%- if reply._raw and reply._raw["orcid-id"] -%}
+        {{- reply._raw["orcid-id"] -}}
       {%- else -%}
-        "{{ replyObject.name }} (https://fairsharing.org/{{ replyObject.id }})"
+        {%- set value = integration_plain(reply)|trim -%}
+        {%- if "ORCID:" in value -%}
+          {%- set parts = value.split("ORCID:")[-1].strip().split() -%}
+          {%- if parts|length > 0 and parts[0]|length >= 15 -%}{{ parts[0] }}{%- endif -%}
+        {%- else -%}
+          {{- value -}}
+        {%- endif -%}
       {%- endif -%}
-    {%- else -%}
-      "{{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|replace("<p>", "")|replace("</p>", "") }}"
     {%- endif -%}
-  {%- elif reply and reply.value.value.type == "PlainType" -%}
-    "{{ reply.value.value.value }}"
-  {%- endif -%}
+  {%- endautoescape -%}
 {%- endmacro -%}
 
-{%- macro integrationCrossref(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- if reply.value.value.raw -%}
-      {%- set replyObject = reply.value.value.raw -%}
-      {{ replyObject.uri }}
-    {%- else -%}
-      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|replace("<p>", "")|replace("</p>", "") }}
+{#- URI of a funder picked from the Crossref Funder Registry. -#}
+{%- macro funder_uri(reply) -%}
+  {%- autoescape false -%}
+    {%- if reply -%}
+      {%- if reply._raw and reply._raw.uri -%}
+        {{- reply._raw.uri -}}
+      {%- else -%}
+        {{- integration_plain(reply)|trim -}}
+      {%- endif -%}
     {%- endif -%}
-  {%- elif reply and reply.value.value.type == "PlainType" -%}
-    {{ reply.value.value.value }}
-  {%- endif -%}
+  {%- endautoescape -%}
 {%- endmacro -%}
 
-{%- macro integrationCurrency(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- if reply.value.value.raw -%}
-      {%- set replyObject = reply.value.value.raw -%}
-      {{replyObject.code}}
-    {%- else -%}
-      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|replace("<p>", "")|replace("</p>", "") }}
+{#-
+  ISO 4217 currency code of a currency reply. Hand-written values are only
+  accepted when they already look like a code, as the maDMP schema restricts
+  `currency_code` to the ISO 4217 list.
+-#}
+{%- macro currency_code(reply) -%}
+  {%- autoescape false -%}
+    {%- if reply -%}
+      {%- if reply._raw and reply._raw.code -%}
+        {{- reply._raw.code|upper -}}
+      {%- else -%}
+        {%- set value = integration_plain(reply)|trim|upper -%}
+        {%- if value|length == 3 and value.isalpha() -%}{{ value }}{%- endif -%}
+      {%- endif -%}
     {%- endif -%}
-  {%- endif -%}
-{%- endmacro -%}
-
-{%- macro integrationValue(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationLegacyType" -%}
-    {{ reply.value.value.value.rsplit(" ![]")[0] }}
-  {%- elif reply %}
-    {{ reply.value.value.value }}
-  {%- endif -%}
+  {%- endautoescape -%}
 {%- endmacro -%}

@@ -1,11 +1,24 @@
 # Machine-Actionable DMP
 
-Template based on the [RDA DMP Common Standard (DCS)](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard) for machine-actionable Data Management Plans and the provided [JSON schema](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema) for machine-actionable DMPs. It also uses the [DCS Ontology](https://github.com/RDA-DMP-Common/dcso) to allow export in RDF. Template is designed for use in [Data Stewardship Wizard](https://ds-wizard.org) with [*Common Data Stewardship knowledge model*](https://registry.ds-wizard.org/knowledge-models/dsw:root:latest) and [*Life Sciences DSW Knowledge Model*](https://registry.ds-wizard.org/knowledge-models/dsw:lifesciences:latest).
+Template based on the [RDA DMP Common Standard (DCS)](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard) for machine-actionable Data Management Plans, producing JSON according to the provided [JSON schema 1.2](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/blob/master/examples/JSON/JSON-schema/1.2/maDMP-schema-1.2.json). Template is designed for use in [Data Stewardship Wizard](https://ds-wizard.org) with [*Common Data Stewardship knowledge model*](https://registry.ds-wizard.org/knowledge-models/dsw:root:latest) and [*Life Sciences DSW Knowledge Model*](https://registry.ds-wizard.org/knowledge-models/dsw:lifesciences:latest).
 
 
 ## Usage
 
 This template is available through [DSW Registry](https://registry.ds-wizard.org/templates).
+
+To get a maDMP that validates against the DCS schema, the questionnaire needs at least one contributor with the *Contact Person* role and a filled-in e-mail address: `contact` is a required field of the standard and there is nothing else to derive it from.
+
+
+## Development
+
+The mapping is driven by the [replies extraction](https://guide.ds-wizard.org/en/latest/more/development/document-templates/steps/jinja.html#replies-extraction) of the document worker, which turns the questionnaire into a plain object based on the `json.key` and `json.value` annotations of the knowledge model, instead of addressing the replies by UUID paths:
+
+* `src/madmp.json.j2` – entry point of the JSON format
+* `src/_mapping.j2` – mapping of the extracted replies to the DCS structure
+* `src/macros.j2` – helpers for reading values out of the extracted replies
+
+Contributor roles are expressed with the [DataCite contributorType](https://datacite-metadata-schema.readthedocs.io/en/4.5/appendices/appendix-1/contributorType/) vocabulary recommended by the standard. The knowledge model also offers *Data Protection Officer*, *Data Steward*, and *Creator of DMP*, which DataCite does not define; those keep their own `DataProtectionOfficer`, `DataSteward`, and `CreatorOfDMP` terms rather than all collapsing into `Other`.
 
 
 ## Issues and Contributing
@@ -27,6 +40,17 @@ This document template for DSW is available as open-source via GitHub Repository
 
 
 ## Changelog
+
+### 2.0.0
+
+- Reworked the whole mapping to use the replies extraction instead of addressing replies by UUID paths
+- Updated the output to RDA DMP Common Standard 1.2 (from 1.1)
+- Removed the RDF formats (Turtle, N3, RDF/XML, JSON-LD, N-Triples, TriG) and the DCSO mapping for now, only JSON is produced
+- Changed contributor roles to the DataCite contributorType vocabulary recommended by the standard (e.g. `DataCurator` instead of `data curator`)
+- Updated dependency on KM to 2.8.0, which is where the used annotations come from
+- Fixed data aggregation never being reported among the ethical issues
+- Fixed cost values with decimals being truncated to whole numbers
+- Fixed costs without a title and projects without a name being exported as incomplete objects
 
 ### 1.28.1
 

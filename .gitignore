@@ -3,3 +3,4 @@ env/
 template.zip
 template*.zip
 .DS_Store
+test/
