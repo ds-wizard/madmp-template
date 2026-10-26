@@ -1,7 +1,8 @@
+{#- Macros return their text unescaped (|safe): the outputs are JSON and Turtle, not HTML -#}
 {%- macro integrationOrcid(reply) -%}
   {%- if reply and reply.value.value.type == "IntegrationType" -%}
     {%- if reply.value.value.raw -%}
-      {{ reply.value.value.raw["orcid-id"] }}
+      {{ reply.value.value.raw["orcid-id"]|safe }}
     {%- else -%}
       {# Extract ORCID number from the value string #}
       {%- set value = reply.value.value.value %}
@@ -11,19 +12,19 @@
       {%- endif -%}
     {%- endif -%}
   {%- elif reply and reply.value.value.type == "PlainType" -%}
-   {{ reply.value.value.value }}
+   {{ reply.value.value.value|safe }}
   {%- endif -%}
 {%- endmacro -%}
 
 {%- macro integrationText(reply) -%}
   {%- if reply and reply.value.value.type == "IntegrationType" -%}
     {%- if reply.value.value.raw and reply.value.value.raw.name -%}
-      {{ [reply.value.value.raw.abbreviation, reply.value.value.raw.name]|select|join(" ") }}
+      {{ [reply.value.value.raw.abbreviation, reply.value.value.raw.name]|select|join(" ")|safe }}
     {%- else -%}
-      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags }}
+      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags|safe }}
     {%- endif -%}
   {%- elif reply and reply.value.value.type == "PlainType" -%}
-    {{ reply.value.value.value }}
+    {{ reply.value.value.value|safe }}
   {%- endif -%}
 {%- endmacro -%}
 
@@ -31,12 +32,12 @@
   {%- if reply and reply.value.value.type == "IntegrationType" -%}
     {%- if reply.value.value.raw -%}
       {%- set replyObject = reply.value.value.raw -%}
-      {{ replyObject.uri }}
+      {{ replyObject.uri|safe }}
     {%- else -%}
-      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|replace("<p>", "")|replace("</p>", "") }}
+      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags|safe }}
     {%- endif -%}
   {%- elif reply and reply.value.value.type == "PlainType" -%}
-    {{ reply.value.value.value }}
+    {{ reply.value.value.value|safe }}
   {%- endif -%}
 {%- endmacro -%}
 
@@ -44,12 +45,12 @@
   {%- if reply and reply.value.value.type == "IntegrationType" -%}
     {%- if reply.value.value.raw -%}
       {%- set replyObject = reply.value.value.raw -%}
-      {{replyObject.code}}
+      {{ replyObject.code|safe }}
     {%- else -%}
-      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|replace("<p>", "")|replace("</p>", "") }}
+      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags|safe }}
     {%- endif -%}
   {%- elif reply and reply.value.value.type == "PlainType" -%}
-    {{ reply.value.value.value }}
+    {{ reply.value.value.value|safe }}
   {%- endif -%}
 {%- endmacro -%}
 
@@ -67,5 +68,18 @@
     url
   {%- else -%}
     other
+  {%- endif -%}
+{%- endmacro -%}
+
+{#- Items joined into an enumeration: "A", "A and B", "A, B, and C" -#}
+{%- macro joinAnd(items) -%}
+  {%- if items|length > 2 -%}
+    {#- TRANSLATORS: the end of an enumeration of three or more items, e.g. "A, B, and C" -#}
+    {{ _("%(items)s, and %(last)s", items=items[:-1]|join(", ")|safe, last=items[-1]|safe) }}
+  {%- elif items|length == 2 -%}
+    {#- TRANSLATORS: an enumeration of two items, e.g. "A and B" -#}
+    {{ _("%(first)s and %(last)s", first=items[0]|safe, last=items[1]|safe) }}
+  {%- elif items|length == 1 -%}
+    {{ items[0]|safe }}
   {%- endif -%}
 {%- endmacro -%}

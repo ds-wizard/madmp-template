@@ -25,8 +25,16 @@ This document template for DSW is available as open-source via GitHub Repository
   * ORCID: [0000-0001-8575-6533](https://orcid.org/0000-0001-8575-6533)
   * GitHub: [@jmartinkova](https://github.com/jmartinkova)
 
+Starting v1.30.0, AI tools (Codex, Claude Code) are used to assist in the development of this template. The AI tools are used to generate text, fix typos, and improve grammar. The AI tools are used to assist the human contributors in the development of the template.
 
 ## Changelog
+
+### 1.30.0
+
+- Supported template localization (document template locales, metamodel version 18.3, released in DSW 4.35.0): all texts of the maDMP (description, ethical issues, costs) are translatable, codes and contributor roles stay in English
+- Added Czech test translation (`locales/cs.po`)
+- Set `language` of the DMP according to the locale of the document (ISO 639-3, e.g. `ces`), `eng` without a locale
+- Fixed integration values (e.g. funder names) being HTML-escaped (`&amp;`)
 
 ### 1.29.0
 
