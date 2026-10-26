@@ -31,6 +31,7 @@
 {%- set projectStartQUuid = "de84b9b5-bcd0-4954-8370-72ea83916b8c" -%}
 {%- set projectEndQUuid = "cabc6f07-6015-454e-b97a-c34db4ec0c60" -%}
 {%- set costQUuid = "353eeaca-45fa-4958-a33c-ec6de3075701" -%}
+{#- not in dsw:lifesciences 2.8.x (missing there); the cost title falls back to the description -#}
 {%- set costTitleQUuid = "7098b454-bc5e-4f83-a95d-970aa42e1479" -%}
 {%- set costDescriptionQUuid = "b3d9b6ca-bd24-4fa3-a3bd-d15005b9ae8b" -%}
 {%- set costCurrencyQUuid = "ac1f8f04-17a2-49e9-b2ad-2a9f8e44efb3" -%}
@@ -82,6 +83,8 @@
 {%- set collectPersonalQUuid = "49c009cb-a38c-4836-9780-8a8b3dd1cbac" -%}
 {%- set collectPersonalNoAUuid = "4bdc319d-282a-4a80-9cdd-78d2081e812b" -%}
 {%- set collectPersonalYesAUuid = "421e2d3e-c95c-4244-9465-de8f1cb8aeba" -%}
+{%- set cpersGdprQUuid = "c8687abf-ac88-4bef-b1cc-7070bd039a07" -%}
+{%- set cpersGdprExploreAUuid = "d8ecede2-f952-4b08-8a68-20d97849733f" -%}
 {%- set cpersLegalBasisQUuid = "be4651c9-9a8c-4e10-a158-61b94ca0e139" -%}
 {%- set cpersLegalBasisAskAUuid = "73cd2dda-41ba-456b-9a4e-aa34c78f2fcf" -%}
 {%- set cpersConsentQUuid = "f5e162ee-1077-4ebe-a932-192bc7f67e98" -%}
@@ -92,11 +95,22 @@
 {%- set cpersReusersQUuid = "d0e029ee-aee0-420f-bc6f-ad471410ad42" -%}
 {%- set cpersReusersNoAUuid = "e4b4093e-9abd-40ce-bd9a-8720b2966017" -%}
 {%- set cpersReusersYesAUuid = "dce67815-b47b-4e92-a70e-b32735cf9e5b" -%}
+{%- set cpersLegalBasisOtherAUuid = "2a84c15c-f5ca-4471-b1fe-10f3d1231f24" -%}
+{%- set cpersLegalBasisOtherQUuid = "b307cc44-7896-4383-b9b0-11cf4a58f531" -%}
 {%- set cpersLegalBasisContractAUuid = "1dfe0a6d-4281-4d5e-bcaa-5e20fa28a591" -%}
 {%- set cpersLegalBasisLegitAUuid = "9d5e3104-2b6b-4d95-848e-253ef069d8b3" -%}
 {%- set cpersLegalBasisVitalAUuid = "557a5401-a94a-4a37-af2e-a21829557bfa" -%}
 {%- set cpersLegalBasisLegalAUuid = "f10de3a8-2751-42c7-afaa-92eed4833f8e" -%}
 {%- set cpersLegalBasisPublicAUuid = "c732f0b9-2f66-47f4-902f-724a44cdfd4b" -%}
+{%- set cpersNeedDpiaQUuid = "8915bd25-db22-4ed6-bcc8-b1bbdc52989e" -%}
+{%- set cpersNeedDpiaNoAUuid = "d0741ff3-370b-44e7-860d-00b1f01e6254" -%}
+{%- set cpersNeedDpiaYesAUuid = "c3914e43-cca1-4180-8960-228b7022bae6" -%}
+{%- set ethicalLegislationQUuid = "ebcbf4c6-ce25-4a0b-9e82-039a88498203" -%}
+{%- set ethicalLegislationNoAUuid = "579c0a9a-29f0-4ab8-991d-bc4f55f2e4b8" -%}
+{%- set ethicalLegislationYesAUuid = "9310b639-4cf7-4f94-8fbe-c1afc50afe4b" -%}
+{%- set ethicalReviewQUuid = "3782d32b-91b5-432f-8f93-92bb22868a22" -%}
+{%- set ethicalReviewNoAUuid = "6480ac87-faaa-4b47-9a66-f338e95ace5a" -%}
+{%- set ethicalReviewYesAUuid = "04644b31-678c-45d5-807d-93d0d79f2221" -%}
 {%- set givingAccessCUuid = "6be88f7c-f868-460f-bba7-91e1c659adfd" -%}
 {%- set canOpenQUuid = "a549d10b-aa46-4c0c-863f-30219ac5ecce" -%}
 {%- set canOpenNoAUuid = "b3739ebd-2d8e-42d3-9425-a7d6d1b26c79" -%}
@@ -128,11 +142,6 @@
 {%- set producingDescriptionQUuid = "205a886d-83d7-4359-ae63-7103e05357c3" -%}
 {%- set producingIdsQUuid = "cf727a0a-78c4-45a7-aa9b-cf7650ae873a" -%}
 {%- set producingIdsTypeQUuid = "5c22cf59-89e3-43a1-af10-1af43a97bcb2" -%}
-{%- set producingIdsTypeHandleAUuid = "b93a037a-006a-486f-87e0-6bef5c28879b" -%}
-{%- set producingIdsTypeDoiAUuid = "48062bc9-0ffb-4509-bec6-e90641a30569" -%}
-{%- set producingIdsTypeArkAUuid = "c353f027-823b-4242-9149-37dca26cf4bc" -%}
-{%- set producingIdsTypeUrlAUuid = "7a1d3b28-5f85-48b8-b052-2448c276d9fc" -%}
-{%- set producingIdsTypeOtherAUuid = "97236701-7b62-40f8-99a0-3b18d3fe3658" -%}
 {%- set producingIdsIdQUuid = "9e13b2d3-5f00-4e19-8a52-5c33c5b1cb07" -%}
 {%- set producingPersonalQUuid = "a1d76760-053c-4706-80a2-cfb6c6a061f3" -%}
 {%- set producingPersonalNoAUuid = "4b2a08c7-4942-41fc-8114-d3868c882624" -%}
@@ -153,5 +162,4 @@
 {%- set distroLicensesWhatCCBYAUuid = "9186e183-e328-41f9-b012-149d0bbad9ea" -%}
 {%- set distroLicensesWhatOtherAUuid = "734d5f4e-91c0-4019-8164-8c70c2e0c8f2" -%}
 {%- set distroLicensesWhatOtherLinkQUuid = "375792f1-d7c3-4c8d-bf9e-f15ffa38e2fb" -%}
-{%- set distroLicensesWhatQUuid = "ca0f9465-3116-4824-8651-b592151c5368" -%}
 {%- set distroLicensesStartQUuid = "28d494ef-26c0-4632-956e-5cafcc498a32" -%}

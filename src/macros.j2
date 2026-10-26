@@ -15,20 +15,15 @@
   {%- endif -%}
 {%- endmacro -%}
 
-{%- macro integrationFairSharing(reply) -%}
+{%- macro integrationText(reply) -%}
   {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- if reply.value.value.raw -%}
-      {%- set replyObject = reply.value.value.raw -%}
-      {%- if replyObject.doi -%}
-        "{{ replyObject.name }} (https://doi.org/{{ replyObject.doi }})"
-      {%- else -%}
-        "{{ replyObject.name }} (https://fairsharing.org/{{ replyObject.id }})"
-      {%- endif -%}
+    {%- if reply.value.value.raw and reply.value.value.raw.name -%}
+      {{ [reply.value.value.raw.abbreviation, reply.value.value.raw.name]|select|join(" ") }}
     {%- else -%}
-      "{{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|replace("<p>", "")|replace("</p>", "") }}"
+      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags }}
     {%- endif -%}
   {%- elif reply and reply.value.value.type == "PlainType" -%}
-    "{{ reply.value.value.value }}"
+    {{ reply.value.value.value }}
   {%- endif -%}
 {%- endmacro -%}
 
@@ -53,13 +48,24 @@
     {%- else -%}
       {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|replace("<p>", "")|replace("</p>", "") }}
     {%- endif -%}
+  {%- elif reply and reply.value.value.type == "PlainType" -%}
+    {{ reply.value.value.value }}
   {%- endif -%}
 {%- endmacro -%}
 
-{%- macro integrationValue(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationLegacyType" -%}
-    {{ reply.value.value.value.rsplit(" ![]")[0] }}
-  {%- elif reply %}
-    {{ reply.value.value.value }}
+{#- DCS identifier type (handle, doi, ark, url, other) of an identifier type given as text
+    (answer label in KM 2.7, FAIRsharing record or typed value in KM 2.8+) -#}
+{%- macro identifierType(text) -%}
+  {%- set t = " " ~ text|lower|replace("(", " ")|replace(")", " ") ~ " " -%}
+  {%- if " doi " in t or "digital object identifier" in t -%}
+    doi
+  {%- elif "handle" in t -%}
+    handle
+  {%- elif " ark " in t or "archival resource key" in t -%}
+    ark
+  {%- elif " url " in t or " uri " in t or "uniform resource" in t -%}
+    url
+  {%- else -%}
+    other
   {%- endif -%}
 {%- endmacro -%}
