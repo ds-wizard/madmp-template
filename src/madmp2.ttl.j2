@@ -21,7 +21,7 @@
   {%- elif type == "handle" -%}
     https://hdl.handle.net/{{ identifier }}
   {%- else -%}
-    {{ uri_dmp }}#{{ identifier }}
+    {{ uri_dmp }}#{{ identifier|urlencode }}
   {%- endif -%}
 {%- endmacro -%}
 
@@ -112,7 +112,7 @@
   {%- endif %}
   foaf:name {{ contributor["name"]|tojson }} .
 
-<{{ uri_contributor_id }}> a dcso:ContactId ;
+<{{ uri_contributor_id }}> a dcso:ContributorId ;
   dcso:identifier_type {{ contributor["contributor_id"]["type"]|tojson }} ;
   dct:identifier {{ contributor["contributor_id"]["identifier"]|tojson }} .
   {%- endfor -%}
@@ -125,18 +125,23 @@
   {%- for project in dmp["project"] %}
     {%- set uri_project = make_uri("project-" ~ loop.index, "other") %}
 <{{ uri_project }}> a dcso:Project ;
-  dct:title {{ project["title"]|tojson }} ;
   {%- if "description" in project.keys() %}
   dct:description {{ project["description"]|tojson }} ;
   {%- endif %}
   {%- if "funding" in project.keys() and project["funding"]|length > 0 %}
+    {%- set projectN = loop.index %}
     {%- for funding in project["funding"] %}
-      {%- set uri_funding = make_uri(funding["funder_id"]["identifier"], funding["funder_id"]["type"]) %}
+      {%- set uri_funding = make_uri("funding-" ~ projectN ~ "-" ~ loop.index, "other") %}
   dcso:hasFunding <{{uri_funding}}> ;
     {%- endfor -%}
   {%- endif %}
+  {%- if "start" in project.keys() %}
   dcso:start {{ project["start"]|tojson }}^^xsd:date ;
-  dcso:end {{ project["end"]|tojson }}^^xsd:date .
+  {%- endif %}
+  {%- if "end" in project.keys() %}
+  dcso:end {{ project["end"]|tojson }}^^xsd:date ;
+  {%- endif %}
+  dct:title {{ project["title"]|tojson }} .
   {%- endfor -%}
 {%- endif %}
 

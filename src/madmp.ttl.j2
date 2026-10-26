@@ -21,7 +21,7 @@
   {%- elif type == "handle" -%}
     https://hdl.handle.net/{{ identifier }}
   {%- else -%}
-    {{ uri_dmp }}#{{ identifier }}
+    {{ uri_dmp }}#{{ identifier|urlencode }}
   {%- endif -%}
 {%- endmacro -%}
 
@@ -54,8 +54,6 @@
       {%- if contributor["role"]|length > 0 %}
       dcso:role {{ contributor["role"]|map('tojson')|join(', ') }} ;
       {%- endif %}
-      {%- if "name" in contributor.keys() %}
-      {%- endif %}
       foaf:name {{ contributor["name"]|tojson }} ;
     ] {{ ";" if loop.last else "," }}
   {%- endfor -%}
@@ -68,8 +66,12 @@
       {%- if "description" in project.keys() %}
       dct:description {{ project["description"]|tojson }} ;
       {%- endif %}
+      {%- if "start" in project.keys() %}
       dcso:start {{ project["start"]|tojson }}^^xsd:date ;
+      {%- endif %}
+      {%- if "end" in project.keys() %}
       dcso:end {{ project["end"]|tojson }}^^xsd:date ;
+      {%- endif %}
       {%- if "funding" in project.keys() and project["funding"]|length > 0 %}
       dcso:hasFunding
       {%- for funding in project["funding"] %}

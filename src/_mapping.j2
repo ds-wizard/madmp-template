@@ -47,28 +47,28 @@
   {%- for role in contributorRoleChoices -%}
     {%- do contributorRoles.append(contributorsMap.get(role, "other")) -%}
   {%- endfor -%}
-  {%- if not contributorOrcidReply -%}
-      {%- set contributor = {
-    "contributor_id": {
-      "identifier": i,
-      "type": "other"
-    }
+  {%- set contributorOrcid = macros.integrationOrcid(contributorOrcidReply)|trim -%}
+  {%- if contributorOrcid == "" -%}
+    {%- set contributor = {
+      "contributor_id": {
+        "identifier": i,
+        "type": "other"
+      }
     } -%}
   {%- else -%}
-    {%- set contributorOrcid = macros.integrationOrcid(contributorOrcidReply) -%}
-      {%- set contributor = {
-    "contributor_id": {
-      "identifier": contributorOrcid|default(""),
-      "type": "orcid"
-    }
+    {%- set contributor = {
+      "contributor_id": {
+        "identifier": contributorOrcid,
+        "type": "orcid"
+      }
     } -%}
   {%- endif -%}
-  {%- do contributor.update({"name": contributorName|default("")}) -%}
+  {%- do contributor.update({"name": contributorName}) -%}
   {%- do contributor.update({"role": contributorRoles|sort}) -%}
   {%- if contributorEmail != "" -%}
     {%- do contributor.update({"mbox": contributorEmail}) -%}
   {%- endif -%}
-  {%- if contributorOrcid != "" and contributorName != "" and contributorRoles|length > 0 -%}{# do not use invalid/incomplete #}
+  {%- if contributorName != "" and contributorRoles|length > 0 -%}{# do not use invalid/incomplete #}
     {%- do contributors.append(contributor) -%}
 
     {%- if uuids.contributorRoleContactPersonAUuid in contributorRoleChoices and contributorEmail != "" -%}
@@ -76,6 +76,14 @@
     {%- endif -%}
   {%- endif -%}
 {%- endfor -%}
+{#- DCS requires a contact: without a contact person, the first contributor with an e-mail -#}
+{%- if contacts|length == 0 -%}
+  {%- for contributor in contributors if "mbox" in contributor -%}
+    {%- if loop.first -%}
+      {%- do contacts.append(contributor) -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
 {#- Projects -#}
 {%- set projectsPath = [uuids.adminDetailsCUuid, uuids.projectsQUuid]|reply_path -%}
 {%- set projectsItems = repliesMap[projectsPath]|reply_items -%}
@@ -91,9 +99,13 @@
   {%- set funding = [] -%}
   {%- for j in projectFundingItems -%}
     {%- set funderReply = repliesMap[[projectFundingPath, j, uuids.projectFundingFunderQUuid]|reply_path] -%}
-    {%- set funderUrl = "" -%}
-    {%- if funderReply -%}
-      {%- set funderUrl = macros.integrationCrossref(funderReply) -%}
+    {%- set funderUrl = macros.integrationCrossref(funderReply)|trim -%}
+    {%- if "10.13039/" in funderUrl -%}{# Crossref Funder Registry (FundRef) DOI #}
+      {%- set funderIdType = "fundref" -%}
+    {%- elif funderUrl.startswith("http") -%}
+      {%- set funderIdType = "url" -%}
+    {%- else -%}
+      {%- set funderIdType = "other" -%}
     {%- endif -%}
     {%- set grantNumber = repliesMap[[projectFundingPath, j, uuids.projectFundingGrantNumberQUuid]|reply_path]|reply_str_value -%}
     {%- set fundingStatusAUuid = repliesMap[[projectFundingPath, j, uuids.projectFundingStatusQUuid]|reply_path]|reply_str_value -%}
@@ -110,8 +122,8 @@
 
     {%- set oneFunding = {
       "funder_id": {
-        "identifier": funderUrl|default(""),
-        "type": "url"
+        "identifier": funderUrl,
+        "type": funderIdType
       }
     } -%}
     {%- if fundingStatus != "" -%}
@@ -120,8 +132,8 @@
     {%- if grantNumber != "" -%}
       {%- do oneFunding.update({
         "grant_id": {
-          "identifier": grantNumber|default(""),
-          "type": "other"
+          "identifier": grantNumber,
+          "type": "url" if grantNumber.startswith("http") else "other"
         }
       }) -%}
     {%- endif -%}
@@ -147,7 +159,7 @@
     {%- do project.update({"funding": funding}) -%}
   {%- endif -%}
 
-  {%- if projectName and projectStart and projectEnd -%}{# do not use invalid/incomplete #}
+  {%- if projectName -%}{# do not use invalid/incomplete #}
     {%- do projects.append(project) -%}
   {%- endif -%}
 {%- endfor -%}
@@ -185,12 +197,12 @@
       {%- set nrefDataPersonalLegalBasisAUuid = repliesMap[nrefDataPersonalLegalBasisPath]|reply_str_value -%}
       {%- do ethicalIssues.append("nref-personal-data") -%}
       {%- if nrefDataPersonalLegalBasisAUuid == uuids.nrefDataPersonalLegalBasisPublicInAUuid -%}
-        {%- do ethicalIssuesDescriptions.append(prefix ~ " contain personal data based on public interest.") -%}
+        {%- do ethicalIssuesDescriptions.append(prefix ~ " contains personal data based on public interest.") -%}
       {%- elif nrefDataPersonalLegalBasisAUuid == uuids.nrefDataPersonalLegalBasisConsentAUuid -%}
         {%- set nrefDataPersonalConsentReusePath = [nrefDataPersonalLegalBasisPath, uuids.nrefDataPersonalLegalBasisConsentAUuid, uuids.nrefDataPersonalConsentReuseQUuid]|reply_path -%}
         {%- set nrefDataPersonalConsentReuseAUuid = repliesMap[nrefDataPersonalConsentReusePath]|reply_str_value -%}
         {%- if nrefDataPersonalConsentReuseAUuid == uuids.nrefDataPersonalConsentReuseYesAUuid -%}
-          {%- do ethicalIssuesDescriptions.append(prefix ~ " contain personal data based on consent which covers our reuse.") -%}
+          {%- do ethicalIssuesDescriptions.append(prefix ~ " contains personal data based on consent which covers our reuse.") -%}
         {%- elif nrefDataPersonalConsentReuseAUuid == uuids.nrefDataPersonalConsentReuseNoAUuid -%}
           {%- do ethicalIssuesDescriptions.append(prefix ~ " contains personal data based on consent, but the consent does not cover our intended reuse; new consent is required.") -%}
         {%- endif -%}
@@ -198,13 +210,13 @@
         {%- set nrefDataPersonalLegalBasisOtherPath = [nrefDataPersonalLegalBasisPath, uuids.nrefDataPersonalLegalBasisOtherAUuid, uuids.nrefDataPersonalLegalBasisOtherQUuid]|reply_path -%}
         {%- set nrefDataPersonalLegalBasisOtherAUuid = repliesMap[nrefDataPersonalLegalBasisOtherPath]|reply_str_value -%}
         {%- if nrefDataPersonalLegalBasisOtherAUuid == uuids.nrefDataPersonalLegalBasisLegReqAUuid -%}
-          {%- do ethicalIssuesDescriptions.append(prefix ~ " contain personal data based on legal requirements.") -%}
+          {%- do ethicalIssuesDescriptions.append(prefix ~ " contains personal data based on legal requirements.") -%}
         {%- elif nrefDataPersonalLegalBasisOtherAUuid == uuids.nrefDataPersonalLegalBasisVitInterAUuid -%}
-          {%- do ethicalIssuesDescriptions.append(prefix ~ " contain personal data based on vital interests.") -%}
+          {%- do ethicalIssuesDescriptions.append(prefix ~ " contains personal data based on vital interests.") -%}
         {%- elif nrefDataPersonalLegalBasisOtherAUuid == uuids.nrefDataPersonalLegalBasisLegInterAUuid -%}
-          {%- do ethicalIssuesDescriptions.append(prefix ~ " contain personal data based on legitimate interests.") -%}
+          {%- do ethicalIssuesDescriptions.append(prefix ~ " contains personal data based on legitimate interests.") -%}
         {%- elif nrefDataPersonalLegalBasisOtherAUuid == uuids.nrefDataPersonalLegalBasisContractAUuid -%}
-          {%- do ethicalIssuesDescriptions.append(prefix ~ " contain personal data based on contract obligations.") -%}
+          {%- do ethicalIssuesDescriptions.append(prefix ~ " contains personal data based on contract obligations.") -%}
         {%- endif -%}
       {%- endif -%}
     {%- endif -%}
@@ -226,11 +238,15 @@
 {%- if collectPersonalAUuid == uuids.collectPersonalYesAUuid %}
   {%- do ethicalIssuesDescriptions.append("We will collect data connected to a person, i.e. \"personal data\".") -%}
   {%- do ethicalIssues.append("collect-personal-data") -%}
-  {%- set legalBasePath = [collectPersonalPath, collectPersonalAUuid, uuids.cpersLegalBasisQUuid]|reply_path -%}
+  {%- set gdprPath = [collectPersonalPath, uuids.collectPersonalYesAUuid, uuids.cpersGdprQUuid, uuids.cpersGdprExploreAUuid]|reply_path -%}
+  {%- set legalBasePath = [gdprPath, uuids.cpersLegalBasisQUuid]|reply_path -%}
   {%- set legalBaseAUuid = repliesMap[legalBasePath]|reply_str_value -%}
+  {%- if legalBaseAUuid == uuids.cpersLegalBasisOtherAUuid -%}
+    {%- set legalBaseAUuid = repliesMap[[legalBasePath, uuids.cpersLegalBasisOtherAUuid, uuids.cpersLegalBasisOtherQUuid]|reply_path]|reply_str_value -%}
+  {%- endif -%}
   {%- if legalBaseAUuid == uuids.cpersLegalBasisAskAUuid %}
     {%- do ethicalIssuesDescriptions.append("We ask the data subjects for their consent.") -%}
-    {%- set consentPath = [legalBasePath, legalBaseAUuid, uuids.cpersConsentQUuid]|reply_path -%}
+    {%- set consentPath = [legalBasePath, uuids.cpersLegalBasisAskAUuid, uuids.cpersConsentQUuid]|reply_path -%}
     {%- set consentAUuid = repliesMap[consentPath]|reply_str_value -%}
     {%- if consentAUuid == uuids.cpersConsentUseAUuid %}
       {%- do ethicalIssuesDescriptions.append("We will collect consent for our specific use of the data.") -%}
@@ -241,7 +257,7 @@
     {%- elif consentAUuid == uuids.cpersConsentAnonAUuid %}
       {%- do ethicalIssuesDescriptions.append("We ask for consent for anonymization; we will anonymise first and all further processing is on the anonymous data.") -%}
     {%- endif -%}
-    {%- set reusersPath = [legalBasePath, legalBaseAUuid, uuids.cpersReusersQUuid]|reply_path -%}
+    {%- set reusersPath = [legalBasePath, uuids.cpersLegalBasisAskAUuid, uuids.cpersReusersQUuid]|reply_path -%}
     {%- set reusersAUuid = repliesMap[reusersPath]|reply_str_value -%}
     {%- if reusersAUuid == uuids.cpersReusersNoAUuid %}
       {%- do ethicalIssuesDescriptions.append("The consent form will not be available for re-users.") -%}
@@ -259,15 +275,23 @@
   {%- elif legalBaseAUuid == uuids.cpersLegalBasisPublicAUuid %}
     {%- do ethicalIssuesDescriptions.append("We do this for the benefit of society, and this is more important than the privacy of the subjects (i.e. public interest).") -%}
   {%- endif -%}
-  {%- set ethicReviewPath = [collectPersonalPath, collectPersonalAUuid, uuids.cpersEthicReviewQUuid]|reply_path -%}
-  {%- set ethicReviewAUuid = repliesMap[ethicReviewPath]|reply_str_value -%}
-  {%- if ethicReviewAUuid == uuids.cpersEthicReviewYesAUuid %}
-    {%- do ethicalIssuesDescriptions.append("An ethical committee will make an ethical review on the project.") -%}
-  {%- endif -%}
-  {%- set needDpiaPath = [collectPersonalPath, collectPersonalAUuid, uuids.cpersNeedDpiaQUuid]|reply_path -%}
+  {%- set needDpiaPath = [gdprPath, uuids.cpersNeedDpiaQUuid]|reply_path -%}
   {%- set needDpiaAUuid = repliesMap[needDpiaPath]|reply_str_value -%}
   {%- if needDpiaAUuid == uuids.cpersNeedDpiaYesAUuid %}
     {%- do ethicalIssuesDescriptions.append("We need to conduct a data protection impact assessment (DPIA).") -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- set ethicalLegislationPath = [uuids.creatingCUuid, uuids.ethicalLegislationQUuid]|reply_path -%}
+{%- set ethicalLegislationAUuid = repliesMap[ethicalLegislationPath]|reply_str_value -%}
+{%- if ethicalLegislationAUuid == uuids.ethicalLegislationYesAUuid -%}
+  {%- do ethicalIssues.append("ethical-legislation") -%}
+  {%- do ethicalIssuesDescriptions.append("The data collection is subject to ethical legislation.") -%}
+  {%- set ethicalReviewAUuid = repliesMap[[ethicalLegislationPath, uuids.ethicalLegislationYesAUuid, uuids.ethicalReviewQUuid]|reply_path]|reply_str_value -%}
+  {%- if ethicalReviewAUuid == uuids.ethicalReviewYesAUuid -%}
+    {%- do ethicalIssuesDescriptions.append("The data collection is covered by an ethical review.") -%}
+  {%- elif ethicalReviewAUuid == uuids.ethicalReviewNoAUuid -%}
+    {%- do ethicalIssuesDescriptions.append("The data collection is not covered by an ethical review.") -%}
   {%- endif -%}
 {%- endif -%}
 
@@ -278,13 +302,19 @@
   {%- set legalReasonsAUuid = repliesMap[legalReasonsPath]|reply_str_value -%}
   {%- if legalReasonsAUuid == uuids.legalReasonsYesAUuid -%}
     {%- do ethicalIssues.append("legal-reasons") -%}
+    {%- do ethicalIssuesDescriptions.append("There are legal reasons why some of our data cannot be open.") -%}
+  {%- endif -%}
+  {%- set privacyReasonsPath = [legalReasonsPath, uuids.legalReasonsYesAUuid, uuids.privacyReasonsQUuid]|reply_path -%}
+  {%- set privacyReasonsAUuid = repliesMap[privacyReasonsPath]|reply_str_value -%}
+  {%- if legalReasonsAUuid == uuids.legalReasonsYesAUuid and privacyReasonsAUuid == uuids.privacyReasonsYesAUuid -%}
+    {%- do ethicalIssues.append("privacy-reasons") -%}
     {%- do ethicalIssuesDescriptions.append("There are privacy reasons so our data cannot be open.") -%}
 
-    {%- set legalReasonsYesPath = [uuids.givingAccessCUuid, uuids.legalReasonsQUuid, uuids.legalReasonsYesAUuid]|reply_path -%}
-    {%- set privacyRestrictionsAUuid = repliesMap[[legalReasonsYesPath, uuids.privacyRestrictionsQUuid]|reply_path]|reply_str_value -%}
-    {%- set privacyPseudoAUuid = repliesMap[[legalReasonsYesPath, uuids.privacyPseudoQUuid]|reply_path]|reply_str_value -%}
-    {%- set privacyAnonAUuid = repliesMap[[legalReasonsYesPath, uuids.privacyAnonQUuid]|reply_path]|reply_str_value -%}
-    {%- set privacyAggregationAUuid = repliesMap[[legalReasonsYesPath, uuids.privacyAggregationQUuid]|reply_path]|reply_str_value -%}
+    {%- set privacyReasonsYesPath = [privacyReasonsPath, uuids.privacyReasonsYesAUuid]|reply_path -%}
+    {%- set privacyRestrictionsAUuid = repliesMap[[privacyReasonsYesPath, uuids.privacyRestrictionsQUuid]|reply_path]|reply_str_value -%}
+    {%- set privacyPseudoAUuid = repliesMap[[privacyReasonsYesPath, uuids.privacyPseudoQUuid]|reply_path]|reply_str_value -%}
+    {%- set privacyAnonAUuid = repliesMap[[privacyReasonsYesPath, uuids.privacyAnonQUuid]|reply_path]|reply_str_value -%}
+    {%- set privacyAggregationAUuid = repliesMap[[privacyReasonsYesPath, uuids.privacyAggregationQUuid]|reply_path]|reply_str_value -%}
 
     {%- if privacyRestrictionsAUuid == uuids.privacyRestrictionsNoAUuid -%}
       {%- do ethicalIssuesDescriptions.append("There are no restrictions where the data can be stored.") -%}
@@ -308,9 +338,9 @@
       {%- do ethicalIssuesDescriptions.append("We can make the data more openly available by anonymization.") -%}
     {%- endif -%}
 
-    {%- if privacyAggregationQUuid == uuids.privacyAggregationNoAUuid -%}
+    {%- if privacyAggregationAUuid == uuids.privacyAggregationNoAUuid -%}
       {%- do ethicalIssuesDescriptions.append("We cannot make the data more openly available through data aggregation.") -%}
-    {%- elif privacyAggregationQUuid == uuids.privacyAggregationYesAUuid -%}
+    {%- elif privacyAggregationAUuid == uuids.privacyAggregationYesAUuid -%}
       {%- do ethicalIssuesDescriptions.append("We can make the data more openly available through data aggregation.") -%}
     {%- endif -%}
   {%- endif -%}
@@ -318,6 +348,8 @@
 
 {%- if ethicalIssues|length > 0 -%}
   {%- set ethicalIssuesExist = "yes" -%}
+{%- elif collectPersonalAUuid == "" and ethicalLegislationAUuid == "" -%}{# not answered yet #}
+  {%- set ethicalIssuesExist = "unknown" -%}
 {%- else -%}
   {%- set ethicalIssuesExist = "no" -%}
 {%- endif -%}
@@ -353,26 +385,20 @@
   {%- set identifiersItems = repliesMap[identifiersPath]|reply_items -%}
   {%- for j in identifiersItems -%}
     {%- set idTypePath = [identifiersPath, j, uuids.producingIdsTypeQUuid]|reply_path -%}
-    {%- set idTypeAUuid = repliesMap[idTypePath]|reply_str_value -%}
+    {%- set idTypeReply = repliesMap[idTypePath] -%}
     {%- set idIdentifierPath = [identifiersPath, j, uuids.producingIdsIdQUuid]|reply_path -%}
-    {%- set idIdentifier = repliesMap[idIdentifierPath]|reply_str_value -%}
-    {%- set idType = "other" -%}
-    {%- if idTypeAUuid == uuids.producingIdsTypeHandleAUuid -%}
-      {%- set idType = "handle" -%}
-    {%- elif idTypeAUuid == uuids.producingIdsTypeDoiAUuid -%}
-      {%- set idType = "doi" -%}
-    {%- elif idTypeAUuid == uuids.producingIdsTypeArkAUuid -%}
-      {%- set idType = "ark" -%}
-    {%- elif idTypeAUuid == uuids.producingIdsTypeUrlAUuid -%}
-      {%- set idType = "url" -%}
-    {%- elif idTypeAUuid == uuids.producingIdsTypeOtherAUuid -%}
-      {%- set idType = "other" -%}
+    {%- set idIdentifier = repliesMap[idIdentifierPath]|reply_str_value|trim -%}
+    {#- the type is an answer in KM 2.7 and a FAIRsharing integration since KM 2.8 -#}
+    {%- if idTypeReply and idTypeReply.value.type == "AnswerReply" -%}
+      {%- set idTypeText = km.entities.answers.get(idTypeReply.value.value, {}).get("label", "") -%}
+    {%- else -%}
+      {%- set idTypeText = macros.integrationText(idTypeReply)|trim -%}
     {%- endif -%}
 
     {%- if idIdentifier -%}
       {%- do identifiers.append({
-        "identifier": idIdentifier|default(""), 
-        "type": idType|default("")
+        "identifier": idIdentifier,
+        "type": macros.identifierType(idTypeText)|trim
       }) -%}
     {%- endif -%}
   {%- endfor -%}
@@ -441,7 +467,7 @@
 
   {%- set dataset = {
     "dataset_id": {
-        "identifier": "",
+        "identifier": i,
         "type": "other"
     },
     "title": datasetName|default(""),
@@ -503,18 +529,20 @@
       {%- endif %}
     {%- endif -%}
 
+    {#- title is required; dsw:lifesciences 2.8.x has no Title question -#}
     {%- set oneCost = {
-      "title" : costTitle|default(""),
+      "title": costTitle or costDescriptionReply or ("Cost " ~ loop.index),
     } -%}
-    {%- if costAmount -%}
-      {%- do oneCost.update({"value": costAmount|int}) -%}
+    {%- set costValue = costAmount|replace(" ", "")|float(none) if costAmount else none -%}
+    {%- if costValue is not none -%}
+      {%- do oneCost.update({"value": costValue|int if costValue == costValue|int else costValue}) -%}
     {%- endif -%}
-    {%- set currencyCode = macros.integrationCurrency(costCurrencyReply) -%}
-    {%- if currencyCode -%}
+    {%- set currencyCode = macros.integrationCurrency(costCurrencyReply)|trim|upper -%}
+    {%- if currencyCode|length == 3 and currencyCode.isalpha() -%}
       {%- do oneCost.update({"currency_code": currencyCode }) -%}
     {%- endif -%}
     {%- if costDescriptionReply or costAllocation -%}
-      {%- do oneCost.update({"description": costDescriptionReply|dot + " " + costAllocation|join("") }) -%}
+      {%- do oneCost.update({"description": [costDescriptionReply|dot if costDescriptionReply else "", costAllocation|join("")]|select|join(" ") }) -%}
     {%- endif -%}
 
     {%- do cost.append(oneCost) -%}

@@ -28,6 +28,19 @@ This document template for DSW is available as open-source via GitHub Repository
 
 ## Changelog
 
+### 1.29.0
+
+- Fixed ethical issues that were never exported: legal basis and consent of collected personal data, DPIA, ethical legislation and review, privacy restrictions, pseudonymisation, anonymisation and aggregation
+- Fixed `ethical_issues_exist` to be `unknown` when the questions are not answered yet
+- Added fallback contact (the first contributor with an e-mail) when no contributor has the Contact Person role
+- Fixed funder identifier type (`fundref` for Crossref Funder Registry, `other` for names) and grant identifier type
+- Fixed datasets without an identifier (identified by their item UUID instead of an empty string)
+- Fixed costs: title fallback, decimal amounts, currency entered as text, description spacing
+- Fixed projects without start or end date being omitted
+- Fixed contributors with an unparsable ORCID being omitted
+- Fixed Turtle (no blank nodes): invalid IRIs, merged dataset nodes, links from projects to fundings, type of contributor identifiers
+- Fixed content type of Turtle output (`text/turtle`)
+
 ### 1.28.1
 
 - Fixed text value type questions rendering with markdown
