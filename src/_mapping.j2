@@ -5,6 +5,10 @@
 {%- set dc = ctx|to_context_obj -%}
 {%- set km = ctx.knowledgeModel -%}
 {%- set repliesMap = ctx.project.replies -%}
+{#- Schema: dcsVersion ("1.0" to "1.3") and dcsProfile ("dcs" or "ostrails", based on 1.2) are set
+    by the entry file of the format; what a version does not define is left out -#}
+{%- set dcsMinor = dcsVersion.split(".")[1]|int -%}
+{%- set isOstrails = dcsProfile == "ostrails" -%}
 {#- Basic DMP metadata -#}
 {#- language of the texts: the locale the document is rendered with, else the template's (en) -#}
 {%- set localeCode = (dc.doc.locale.code if dc.doc and dc.doc.locale else "en")|lower|replace("_", "-") -%}
@@ -81,6 +85,18 @@
   {%- if contributorEmail != "" -%}
     {%- do contributor.update({"mbox": contributorEmail}) -%}
   {%- endif -%}
+  {%- set affiliationReply = repliesMap[[contributorsPath, i, uuids.contributorAffiliationQUuid]|reply_path] -%}
+  {%- set affiliationId = macros.rorId(affiliationReply)|trim -%}
+  {%- set affiliationName = macros.integrationName(affiliationReply)|trim -%}
+  {%- if dcsMinor >= 2 and affiliationId != "" and affiliationName != "" -%}{# affiliation since 1.2, its identifier is required #}
+    {%- do contributor.update({"affiliation": [{
+      "name": affiliationName,
+      "affiliation_id": {
+        "identifier": affiliationId,
+        "type": "ror"
+      }
+    }]}) -%}
+  {%- endif -%}
   {%- if contributorName != "" and contributorRoles|length > 0 -%}{# do not use invalid/incomplete #}
     {%- do contributors.append(contributor) -%}
 
@@ -151,10 +167,12 @@
       }) -%}
     {%- endif -%}
 
-    {%- if funderUrl != "" -%}{# do not use invalid/incomplete #}
+    {%- if funderUrl != "" and (grantNumber != "" or dcsMinor >= 1) -%}{# do not use invalid/incomplete; 1.0 requires grant_id #}
       {%- do funding.append(oneFunding) -%}
     {%- endif -%}
   {%- endfor -%}
+  {%- set projectNumber = repliesMap[[projectsPath, i, uuids.projectNumberQUuid]|reply_path]|reply_str_value|trim -%}
+  {%- set projectAcronym = repliesMap[[projectsPath, i, uuids.projectAcronymQUuid]|reply_path]|reply_str_value|trim -%}
 
   {%- set project = {
     "title": projectName
@@ -171,8 +189,17 @@
   {%- if funding|length > 0 -%}
     {%- do project.update({"funding": funding}) -%}
   {%- endif -%}
+  {%- if dcsMinor >= 2 and projectNumber -%}{# project_id since 1.2 #}
+    {%- do project.update({"project_id": [{
+      "identifier": projectNumber,
+      "type": "url" if projectNumber.startswith("http") else "other"
+    }]}) -%}
+  {%- endif -%}
+  {%- if isOstrails and projectAcronym -%}
+    {%- do project.update({"acronym": projectAcronym}) -%}
+  {%- endif -%}
 
-  {%- if projectName -%}{# do not use invalid/incomplete #}
+  {%- if projectName and (dcsMinor >= 1 or (projectStart and projectEnd)) -%}{# do not use invalid/incomplete; 1.0 requires start and end #}
     {%- do projects.append(project) -%}
   {%- endif -%}
 {%- endfor -%}
@@ -431,7 +458,7 @@
       {%- if distroAccessAUuid == uuids.distroAccessOpenAUuid -%}
         {%- set distroAccess = "open" -%}
       {%- elif distroAccessAUuid == uuids.distroAccessSharedAUuid -%}
-        {%- set distroAccess = "shared" -%}
+        {%- set distroAccess = "restricted" if dcsMinor >= 3 else "shared" -%}{# 1.3 deprecated "shared" #}
       {%- elif distroAccessAUuid == uuids.distroAccessClosedAUuid -%}
         {%- set distroAccess = "closed" -%}
       {%- endif -%}
@@ -472,6 +499,32 @@
       {%- if licenses|length > 0 -%}
         {%- do distribution.update({"license": licenses}) -%}
       {%- endif -%}
+
+      {#- host: the repository, named in FAIRsharing for domain-specific and general-purpose ones -#}
+      {%- set repositoryPath = [distributionsPath, j, uuids.distroRepositoryQUuid]|reply_path -%}
+      {%- set repositoryAUuid = repliesMap[repositoryPath]|reply_str_value -%}
+      {%- set repositoryReply = none -%}
+      {%- if repositoryAUuid == uuids.distroRepositoryDomainAUuid -%}
+        {%- set repositoryReply = repliesMap[[repositoryPath, repositoryAUuid, uuids.distroRepositoryDomainQUuid]|reply_path] -%}
+      {%- elif repositoryAUuid == uuids.distroRepositoryGeneralAUuid -%}
+        {%- set repositoryReply = repliesMap[[repositoryPath, repositoryAUuid, uuids.distroRepositoryGeneralQUuid]|reply_path] -%}
+      {%- endif -%}
+      {%- set hostTitle = macros.integrationName(repositoryReply)|trim -%}
+      {%- if hostTitle == "" and repositoryAUuid -%}
+        {%- set hostTitle = km.entities.answers.get(repositoryAUuid, {}).get("label", "") -%}
+      {%- endif -%}
+      {%- set hostUrl = macros.integrationField(repositoryReply, "homepage")|trim -%}
+      {%- set hostDoi = macros.integrationField(repositoryReply, "doi")|trim -%}
+      {%- if hostTitle != "" and (hostUrl != "" or dcsMinor >= 3) -%}{# url is required until 1.3 #}
+        {%- set host = {"title": hostTitle} -%}
+        {%- if hostUrl != "" -%}
+          {%- do host.update({"url": hostUrl}) -%}
+        {%- endif -%}
+        {%- if dcsMinor >= 2 and hostDoi != "" -%}{# host_id since 1.2 #}
+          {%- do host.update({"host_id": [{"identifier": "https://doi.org/" ~ hostDoi, "type": "doi"}]}) -%}
+        {%- endif -%}
+        {%- do distribution.update({"host": host}) -%}
+      {%- endif -%}
       {%- if distroAccess != "" -%}
         {%- do distributions.append(distribution) -%}
       {%- endif -%}
@@ -491,6 +544,16 @@
   {%- if datasetDescription -%}
     {%- do dataset.update({"description": datasetDescription.markdown_plain}) -%}
   {%- endif -%}
+  {%- set datasetTypeAUuid = repliesMap[[datasetsPath, i, uuids.producingTypeQUuid]|reply_path]|reply_str_value -%}
+  {%- if datasetTypeAUuid -%}{# the type as the KM names it, e.g. "Raw data" #}
+    {%- do dataset.update({"type": km.entities.answers.get(datasetTypeAUuid, {}).get("label", "")}) -%}
+  {%- endif -%}
+  {%- set keepPath = [datasetsPath, i, uuids.producingKeepQUuid]|reply_path -%}
+  {%- set keepAUuid = repliesMap[keepPath]|reply_str_value -%}
+  {%- if keepAUuid -%}{# how long it will be kept, as the KM names it, e.g. "For a fixed period (prepaid): 2 years" #}
+    {%- set keepPeriod = repliesMap[[keepPath, uuids.producingKeepFixedAUuid, uuids.producingKeepFixedQUuid]|reply_path]|reply_str_value|trim if keepAUuid == uuids.producingKeepFixedAUuid else "" -%}
+    {%- do dataset.update({"preservation_statement": [km.entities.answers.get(keepAUuid, {}).get("label", ""), keepPeriod]|select|join(": ")}) -%}
+  {%- endif -%}
   {%- if distributions|length > 0 -%}
     {%- do dataset.update({"distribution": distributions}) -%}
   {%- endif -%}
@@ -499,6 +562,53 @@
   {%- endif -%}
   {%- do datasets.append(dataset) -%}
 {%- endfor -%}
+
+{#- Reused datasets (is_reused since 1.2): reference and non-reference data sets the project will use -#}
+{%- if dcsMinor >= 2 and preexistingAUuid == uuids.preexistingYesAUuid -%}
+  {%- set reused = [] -%}
+  {%- set refDataPath = [preexistingPath, uuids.preexistingYesAUuid, uuids.refDataQUuid]|reply_path -%}
+  {%- for i in repliesMap[refDataPath]|reply_items -%}
+    {%- if repliesMap[[refDataPath, i, uuids.refDataUseQUuid]|reply_path]|reply_str_value == uuids.refDataUseYesAUuid -%}
+      {%- do reused.append({
+        "item": i,
+        "name": repliesMap[[refDataPath, i, uuids.refDataNameQUuid]|reply_path]|reply_str_value|trim,
+        "pid": repliesMap[[refDataPath, i, uuids.refDataPidQUuid]|reply_path]|reply_str_value|trim,
+        "personal": "unknown"
+      }) -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- set nrefDataPath = [preexistingPath, uuids.preexistingYesAUuid, uuids.nrefDataQUuid]|reply_path -%}
+  {%- for i in repliesMap[nrefDataPath]|reply_items -%}
+    {%- set nrefDataUsedPath = [nrefDataPath, i, uuids.nrefDataUseQUuid]|reply_path -%}
+    {%- if repliesMap[nrefDataUsedPath]|reply_str_value == uuids.nrefDataUseYesAUuid -%}
+      {%- set nrefDataPersonalAUuid = repliesMap[[nrefDataUsedPath, uuids.nrefDataUseYesAUuid, uuids.nrefDataPersonalQUuid]|reply_path]|reply_str_value -%}
+      {%- do reused.append({
+        "item": i,
+        "name": repliesMap[[nrefDataPath, i, uuids.nrefDataNameQUuid]|reply_path]|reply_str_value|trim,
+        "pid": repliesMap[[nrefDataPath, i, uuids.nrefDataWhereQUuid]|reply_path]|reply_str_value|trim,
+        "personal": "yes" if nrefDataPersonalAUuid == uuids.nrefDataPersonalYesAUuid else ("no" if nrefDataPersonalAUuid == uuids.nrefDataPersonalNoAUuid else "unknown")
+      }) -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- for data in reused -%}
+    {%- if data.pid.startswith("http") -%}
+      {%- set reusedId = {"identifier": data.pid, "type": "url"} -%}
+    {%- elif data.pid.startswith("10.") -%}
+      {%- set reusedId = {"identifier": data.pid, "type": "doi"} -%}
+    {%- elif data.pid -%}
+      {%- set reusedId = {"identifier": data.pid, "type": "other"} -%}
+    {%- else -%}
+      {%- set reusedId = {"identifier": data.item, "type": "other"} -%}
+    {%- endif -%}
+    {%- do datasets.append({
+      "dataset_id": reusedId,
+      "title": data.name or _('(unknown name)'),
+      "is_reused": true,
+      "personal_data": data.personal,
+      "sensitive_data": "unknown"
+    }) -%}
+  {%- endfor -%}
+{%- endif -%}
 
 {#- Cost -#}
 {%- set projectsPath = [uuids.adminDetailsCUuid, uuids.projectsQUuid]|reply_path -%}
@@ -582,6 +692,13 @@
     "mbox": contacts[0]["mbox"],
     "name": contacts[0]["name"],
   }}) -%}
+  {%- if "affiliation" in contacts[0] -%}
+    {%- do dmp.contact.update({"affiliation": contacts[0]["affiliation"]}) -%}
+  {%- endif -%}
+{%- endif -%}
+{#- OSTrails: version of the DMP = the latest named version of the project -#}
+{%- if isOstrails and ctx.project.versions -%}
+  {%- do dmp.update({"version": (ctx.project.versions|sort(attribute="createdAt")|last).name}) -%}
 {%- endif -%}
 {%- if ethicalIssuesDescriptions|length > 0 -%}
   {%- do dmp.update({"ethical_issues_description": ethicalIssuesDescription}) -%}

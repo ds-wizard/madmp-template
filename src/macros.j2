@@ -83,3 +83,43 @@
     {{ items[0]|safe }}
   {%- endif -%}
 {%- endmacro -%}
+
+{#- ROR identifier (URL) of an organization from the ROR integration, empty without one -#}
+{%- macro rorId(reply) -%}
+  {%- if reply and reply.value.value.type == "IntegrationType" -%}
+    {%- if reply.value.value.raw and reply.value.value.raw.id -%}
+      {{ reply.value.value.raw.id|safe }}
+    {%- elif "](https://ror.org/" in reply.value.value.value -%}
+      {{ ("https://ror.org/" ~ reply.value.value.value.split("](https://ror.org/")[1].split(")")[0])|safe }}
+    {%- endif -%}
+  {%- endif -%}
+{%- endmacro -%}
+
+{#- Name of the record behind an integration reply (ROR API v2 display name, FAIRsharing or ROR v1 name, the linked name of an older reply) or the typed value -#}
+{%- macro integrationName(reply) -%}
+  {%- if reply and reply.value.value.type == "IntegrationType" -%}
+    {%- set raw = reply.value.value.raw -%}
+    {%- if raw and raw.names -%}
+      {%- set display = [] -%}
+      {%- for name in raw.names if "ror_display" in (name.types or []) -%}
+        {%- do display.append(name.value) -%}
+      {%- endfor -%}
+      {{ (display[0] if display else raw.names[0].value)|safe }}
+    {%- elif raw and raw.name -%}
+      {{ raw.name|safe }}
+    {%- elif "[**" in reply.value.value.value -%}
+      {{ reply.value.value.value.split("[**")[1].split("**]")[0]|safe }}
+    {%- else -%}
+      {{ reply.value.value.value|safe }}
+    {%- endif -%}
+  {%- elif reply and reply.value.value.type == "PlainType" -%}
+    {{ reply.value.value.value|safe }}
+  {%- endif -%}
+{%- endmacro -%}
+
+{#- A field of the record behind an integration reply (e.g. FAIRsharing "homepage", "doi"), empty without one -#}
+{%- macro integrationField(reply, field) -%}
+  {%- if reply and reply.value.value.type == "IntegrationType" and reply.value.value.raw and reply.value.value.raw[field] -%}
+    {{ reply.value.value.raw[field]|safe }}
+  {%- endif -%}
+{%- endmacro -%}
