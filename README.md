@@ -1,6 +1,19 @@
 # Machine-Actionable DMP
 
-Template based on the [RDA DMP Common Standard (DCS)](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard) for machine-actionable Data Management Plans and the provided [JSON schema](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema) for machine-actionable DMPs. It also uses the [DCS Ontology](https://github.com/RDA-DMP-Common/dcso) to allow export in RDF. Template is designed for use in [Data Stewardship Wizard](https://ds-wizard.org) with [*Common Data Stewardship knowledge model*](https://registry.ds-wizard.org/knowledge-models/dsw:root:latest) and [*Life Sciences DSW Knowledge Model*](https://registry.ds-wizard.org/knowledge-models/dsw:lifesciences:latest).
+Template based on the [RDA DMP Common Standard (DCS)](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard) for machine-actionable Data Management Plans. It produces maDMPs in JSON according to the [DCS JSON schemas](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema) and the [OSTrails Application Profile](https://github.com/OSTrails/ostrails-madmp-ap). Template is designed for use in [Data Stewardship Wizard](https://ds-wizard.org) with [*Common Data Stewardship knowledge model*](https://registry.ds-wizard.org/knowledge-models/dsw:root:latest) and [*Life Sciences DSW Knowledge Model*](https://registry.ds-wizard.org/knowledge-models/dsw:lifesciences:latest).
+
+
+## Formats
+
+| Format | Schema |
+|---|---|
+| JSON (DCS 1.3) | [RDA DMP Common Standard 1.3](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema/1.3) |
+| JSON (DCS 1.2) | [RDA DMP Common Standard 1.2](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema/1.2) |
+| JSON (DCS 1.1) | [RDA DMP Common Standard 1.1](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema/1.1) (the former JSON format) |
+| JSON (DCS 1.0) | [RDA DMP Common Standard 1.0](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema/1.0) |
+| JSON (OSTrails AP) | [OSTrails Application Profile](https://github.com/OSTrails/ostrails-madmp-ap) (DCS 1.2 with extensions) |
+
+Each format contains only what its schema defines; for example, affiliations, project identifiers and reused datasets are available since DCS 1.2, and DCS 1.0 requires project dates and grant identifiers (projects and fundings without them are left out). A DMP is valid only when it has a contact (a contributor with the Contact Person role and an e-mail, or at least a contributor with an e-mail) and, for DCS 1.0, at least one dataset.
 
 
 ## Usage
@@ -28,6 +41,14 @@ This document template for DSW is available as open-source via GitHub Repository
 Starting v1.30.0, AI tools (Codex, Claude Code) are used to assist in the development of this template. The AI tools are used to generate text, fix typos, and improve grammar. The AI tools are used to assist the human contributors in the development of the template.
 
 ## Changelog
+
+### 2.0.0
+
+- Added formats for all versions of the RDA DMP Common Standard JSON schema (1.0, 1.1, 1.2, 1.3) and the OSTrails Application Profile; the former JSON format is now JSON (DCS 1.1)
+- Removed RDF formats (Turtle, N3, RDF/XML, JSON-LD, N-Triples, TriG)
+- Added dataset type and preservation statement, and the repository as distribution host (with its homepage and FAIRsharing DOI)
+- Added affiliations (ROR), project identifiers and reused datasets (DCS 1.2 and newer), project acronym and DMP version (OSTrails)
+- Used `restricted` instead of the deprecated `shared` data access (DCS 1.3)
 
 ### 1.30.0
 
