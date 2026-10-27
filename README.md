@@ -1,6 +1,6 @@
 # Machine-Actionable DMP
 
-Template based on the [RDA DMP Common Standard (DCS)](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard) for machine-actionable Data Management Plans. It produces maDMPs in JSON according to the [DCS JSON schemas](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema) and the [OSTrails Application Profile](https://github.com/OSTrails/ostrails-madmp-ap). Template is designed for use in [Data Stewardship Wizard](https://ds-wizard.org) with [*Common Data Stewardship knowledge model*](https://registry.ds-wizard.org/knowledge-models/dsw:root:latest) and [*Life Sciences DSW Knowledge Model*](https://registry.ds-wizard.org/knowledge-models/dsw:lifesciences:latest).
+Template based on the [RDA DMP Common Standard (DCS)](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard) for machine-actionable Data Management Plans. It produces maDMPs in JSON according to the [DCS JSON schemas](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema) and the [OSTrails Application Profile](https://github.com/OSTrails/ostrails-madmp-ap). Template is designed for use in [Data Stewardship Wizard](https://ds-wizard.org) 5.0 or newer (for older versions, use the template version 1.x) with [*Common Data Stewardship knowledge model*](https://registry.ds-wizard.org/knowledge-models/dsw:root:latest) and [*Life Sciences DSW Knowledge Model*](https://registry.ds-wizard.org/knowledge-models/dsw:lifesciences:latest).
 
 
 ## Formats
@@ -44,6 +44,7 @@ Starting v1.30.0, AI tools (Codex, Claude Code) are used to assist in the develo
 
 ### 2.0.0
 
+- Updated to metamodel version 19.0 (Wizard 5.0); the template ID is now `dsw.rda-madmp`
 - Added formats for all versions of the RDA DMP Common Standard JSON schema (1.0, 1.1, 1.2, 1.3) and the OSTrails Application Profile; the former JSON format is now JSON (DCS 1.1)
 - Removed RDF formats (Turtle, N3, RDF/XML, JSON-LD, N-Triples, TriG)
 - Added dataset type and preservation statement, and the repository as distribution host (with its homepage and FAIRsharing DOI)

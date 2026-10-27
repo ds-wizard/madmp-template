@@ -4,14 +4,14 @@
 {%- import "src/_languages.j2" as languages -%}
 {%- set dc = ctx|to_context_obj -%}
 {%- set km = ctx.knowledgeModel -%}
-{%- set repliesMap = ctx.project.replies -%}
+{%- set repliesMap = ctx.questionnaire.replies -%}
 {#- Schema: dcsVersion ("1.0" to "1.3") and dcsProfile ("dcs" or "ostrails", based on 1.2) are set
     by the entry file of the format; what a version does not define is left out -#}
 {%- set dcsMinor = dcsVersion.split(".")[1]|int -%}
 {%- set isOstrails = dcsProfile == "ostrails" -%}
 {#- Basic DMP metadata -#}
 {#- language of the texts: the locale the document is rendered with, else the template's (en) -#}
-{%- set localeCode = (dc.doc.locale.code if dc.doc and dc.doc.locale else "en")|lower|replace("_", "-") -%}
+{%- set localeCode = (dc.document.locale.code if dc.document and dc.document.locale else "en")|lower|replace("_", "-") -%}
 {%- set localeLanguage = localeCode.split("-")[0] -%}
 {%- set dmpLanguage = languages.iso639_3.get(localeLanguage) or (localeLanguage if localeLanguage in languages.iso639_3.values() else "eng") -%}
 {#- maDMP variables -#}
@@ -19,8 +19,8 @@
 {%- set madmpDescription = _('This maDMP has been created using %(service)s (%(domain)s) and is based on knowledge model %(km)s (%(km_id)s). The questionnaire used for this DMP is identified by UUID "%(uuid)s" within %(url)s %(instance)s instance.',
   service=dc.config.service_name|safe,
   domain=dc.config.service_domain_name|safe,
-  km=dc.pkg.name|safe,
-  km_id=[dc.pkg.organization_id, dc.pkg.km_id, dc.pkg.version]|join(":")|safe,
+  km=dc.km_package.name|safe,
+  km_id=[dc.km_package.id, dc.km_package.version]|join(":")|safe,
   uuid=ctx.project.uuid|safe,
   url=ctx.config.clientUrl|safe,
   instance=dc.config.service_name_short|safe) -%}
@@ -119,7 +119,7 @@
 {%- set projects = [] -%}
 {%- for i in projectsItems -%}
   {%- set projectName = repliesMap[[projectsPath, i, uuids.projectNameQUuid]|reply_path]|reply_str_value -%}
-  {%- set projectAbstract = dc.project.replies.get([projectsPath, i, uuids.projectAbstractQUuid]|reply_path)  -%}
+  {%- set projectAbstract = dc.questionnaire.replies.get([projectsPath, i, uuids.projectAbstractQUuid]|reply_path)  -%}
   {%- set projectStart = repliesMap[[projectsPath, i, uuids.projectStartQUuid]|reply_path]|reply_str_value -%}
   {%- set projectEnd = repliesMap[[projectsPath, i, uuids.projectEndQUuid]|reply_path]|reply_str_value -%}
 
@@ -400,7 +400,7 @@
 {%- set datasets = [] -%}
 {%- for i in datasetsItems -%}
   {%- set datasetName = repliesMap[[datasetsPath, i, uuids.producingNameQUuid]|reply_path]|reply_str_value -%}
-  {%- set datasetDescription = dc.project.replies.get([datasetsPath, i, uuids.producingDescriptionQUuid]|reply_path) -%}
+  {%- set datasetDescription = dc.questionnaire.replies.get([datasetsPath, i, uuids.producingDescriptionQUuid]|reply_path) -%}
   {%- set datasetPersonalAUuid = repliesMap[[datasetsPath, i, uuids.producingPersonalQUuid]|reply_path]|reply_str_value -%}
   {%- set datasetSensitiveAUuid = repliesMap[[datasetsPath, i, uuids.producingSensitiveQUuid]|reply_path]|reply_str_value -%}
 
@@ -697,8 +697,8 @@
   {%- endif -%}
 {%- endif -%}
 {#- OSTrails: version of the DMP = the latest named version of the project -#}
-{%- if isOstrails and ctx.project.versions -%}
-  {%- do dmp.update({"version": (ctx.project.versions|sort(attribute="createdAt")|last).name}) -%}
+{%- if isOstrails and ctx.questionnaire.versions -%}
+  {%- do dmp.update({"version": (ctx.questionnaire.versions|sort(attribute="createdAt")|last).name}) -%}
 {%- endif -%}
 {%- if ethicalIssuesDescriptions|length > 0 -%}
   {%- do dmp.update({"ethical_issues_description": ethicalIssuesDescription}) -%}
