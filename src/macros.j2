@@ -1,56 +1,58 @@
-{#- Macros return their text unescaped (|safe): the outputs are JSON and Turtle, not HTML -#}
+{#- Macros return their text unescaped (|safe): the outputs are JSON, not HTML. The replies they
+    take are objects of the extracted model (src/_model.j2): an integration reply has _value and
+    _raw (the record of the integration), a reply typed by the user only _value -#}
 {%- macro integrationOrcid(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- if reply.value.value.raw -%}
-      {{ reply.value.value.raw["orcid-id"]|safe }}
+  {%- if reply and reply._value is not none and "_raw" in reply -%}
+    {%- if reply._raw -%}
+      {{ reply._raw["orcid-id"]|safe }}
     {%- else -%}
       {# Extract ORCID number from the value string #}
-      {%- set value = reply.value.value.value %}
+      {%- set value = reply._value %}
       {%- set orcid = value.split('ORCID:')[-1].strip().split()[0]|replace("**", "")|markdown|replace("<p>", "")|replace("</p>", "") if 'ORCID:' in value else None %}
       {%- if orcid and orcid|length >= 15 -%}
         {{ orcid }}
       {%- endif -%}
     {%- endif -%}
-  {%- elif reply and reply.value.value.type == "PlainType" -%}
-   {{ reply.value.value.value|safe }}
+  {%- elif reply and reply._value is not none and "_raw" not in reply -%}
+   {{ reply._value|safe }}
   {%- endif -%}
 {%- endmacro -%}
 
 {%- macro integrationText(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- if reply.value.value.raw and reply.value.value.raw.name -%}
-      {{ [reply.value.value.raw.abbreviation, reply.value.value.raw.name]|select|join(" ")|safe }}
+  {%- if reply and reply._value is not none and "_raw" in reply -%}
+    {%- if reply._raw and reply._raw.name -%}
+      {{ [reply._raw.abbreviation, reply._raw.name]|select|join(" ")|safe }}
     {%- else -%}
-      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags|safe }}
+      {{ reply._value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags|safe }}
     {%- endif -%}
-  {%- elif reply and reply.value.value.type == "PlainType" -%}
-    {{ reply.value.value.value|safe }}
+  {%- elif reply and reply._value is not none and "_raw" not in reply -%}
+    {{ reply._value|safe }}
   {%- endif -%}
 {%- endmacro -%}
 
 {%- macro integrationCrossref(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- if reply.value.value.raw -%}
-      {%- set replyObject = reply.value.value.raw -%}
+  {%- if reply and reply._value is not none and "_raw" in reply -%}
+    {%- if reply._raw -%}
+      {%- set replyObject = reply._raw -%}
       {{ replyObject.uri|safe }}
     {%- else -%}
-      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags|safe }}
+      {{ reply._value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags|safe }}
     {%- endif -%}
-  {%- elif reply and reply.value.value.type == "PlainType" -%}
-    {{ reply.value.value.value|safe }}
+  {%- elif reply and reply._value is not none and "_raw" not in reply -%}
+    {{ reply._value|safe }}
   {%- endif -%}
 {%- endmacro -%}
 
 {%- macro integrationCurrency(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- if reply.value.value.raw -%}
-      {%- set replyObject = reply.value.value.raw -%}
+  {%- if reply and reply._value is not none and "_raw" in reply -%}
+    {%- if reply._raw -%}
+      {%- set replyObject = reply._raw -%}
       {{ replyObject.code|safe }}
     {%- else -%}
-      {{ reply.value.value.value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags|safe }}
+      {{ reply._value.rsplit(" ![]")[0]|replace("**", "")|markdown|striptags|safe }}
     {%- endif -%}
-  {%- elif reply and reply.value.value.type == "PlainType" -%}
-    {{ reply.value.value.value|safe }}
+  {%- elif reply and reply._value is not none and "_raw" not in reply -%}
+    {{ reply._value|safe }}
   {%- endif -%}
 {%- endmacro -%}
 
@@ -86,19 +88,19 @@
 
 {#- ROR identifier (URL) of an organization from the ROR integration, empty without one -#}
 {%- macro rorId(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- if reply.value.value.raw and reply.value.value.raw.id -%}
-      {{ reply.value.value.raw.id|safe }}
-    {%- elif "](https://ror.org/" in reply.value.value.value -%}
-      {{ ("https://ror.org/" ~ reply.value.value.value.split("](https://ror.org/")[1].split(")")[0])|safe }}
+  {%- if reply and reply._value is not none and "_raw" in reply -%}
+    {%- if reply._raw and reply._raw.id -%}
+      {{ reply._raw.id|safe }}
+    {%- elif "](https://ror.org/" in reply._value -%}
+      {{ ("https://ror.org/" ~ reply._value.split("](https://ror.org/")[1].split(")")[0])|safe }}
     {%- endif -%}
   {%- endif -%}
 {%- endmacro -%}
 
 {#- Name of the record behind an integration reply (ROR API v2 display name, FAIRsharing or ROR v1 name, the linked name of an older reply) or the typed value -#}
 {%- macro integrationName(reply) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" -%}
-    {%- set raw = reply.value.value.raw -%}
+  {%- if reply and reply._value is not none and "_raw" in reply -%}
+    {%- set raw = reply._raw -%}
     {%- if raw and raw.names -%}
       {%- set display = [] -%}
       {%- for name in raw.names if "ror_display" in (name.types or []) -%}
@@ -107,19 +109,19 @@
       {{ (display[0] if display else raw.names[0].value)|safe }}
     {%- elif raw and raw.name -%}
       {{ raw.name|safe }}
-    {%- elif "[**" in reply.value.value.value -%}
-      {{ reply.value.value.value.split("[**")[1].split("**]")[0]|safe }}
+    {%- elif "[**" in reply._value -%}
+      {{ reply._value.split("[**")[1].split("**]")[0]|safe }}
     {%- else -%}
-      {{ reply.value.value.value|safe }}
+      {{ reply._value|safe }}
     {%- endif -%}
-  {%- elif reply and reply.value.value.type == "PlainType" -%}
-    {{ reply.value.value.value|safe }}
+  {%- elif reply and reply._value is not none and "_raw" not in reply -%}
+    {{ reply._value|safe }}
   {%- endif -%}
 {%- endmacro -%}
 
 {#- A field of the record behind an integration reply (e.g. FAIRsharing "homepage", "doi"), empty without one -#}
 {%- macro integrationField(reply, field) -%}
-  {%- if reply and reply.value.value.type == "IntegrationType" and reply.value.value.raw and reply.value.value.raw[field] -%}
-    {{ reply.value.value.raw[field]|safe }}
+  {%- if reply and reply._value is not none and "_raw" in reply and reply._raw and reply._raw[field] -%}
+    {{ reply._raw[field]|safe }}
   {%- endif -%}
 {%- endmacro -%}
