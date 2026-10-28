@@ -42,6 +42,14 @@ Starting v1.30.0, AI tools (Codex, Claude Code) are used to assist in the develo
 
 ## Changelog
 
+### 3.1.0
+
+- Added the ethical approval of research projects (approval status and case number) to ethical issues
+- Added rights of the datasets from the rights of the collected data and their use restrictions (DCS 1.2 and newer)
+- Added related identifiers of the datasets: the paper a dataset supplements and its qualified references to other datasets (DCS 1.2 and newer)
+- Fixed DMPs without a contact when no contributor has a role: a person with a name and an e-mail is the contact
+- Updated Czech translation
+
 ### 3.0.0
 
 - Read replies by knowledge model annotations (`json.key`, `json.value`) instead of UUIDs; requires knowledge models 2.8.1 and newer
