@@ -3,9 +3,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: maDMP (RDA DMP Common Standard) 2.0.0\n"
+"Project-Id-Version: maDMP (RDA DMP Common Standard) 3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-26 10:00+0100\n"
+"POT-Creation-Date: 2026-10-28 12:14+0100\n"
 "PO-Revision-Date: 2026-10-26 07:58+0000\n"
 "Last-Translator: Content AI Workspace (test translation)\n"
 "Language: cs\n"
@@ -17,42 +17,42 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 #. an enumeration of two items, e.g. "A and B"
-#: src/macros.j2:81
+#: src/macros.j2:83
 #, python-format
 msgid "%(first)s and %(last)s"
 msgstr "%(first)s a %(last)s"
 
 #. the end of an enumeration of three or more items, e.g. "A, B, and C"
-#: src/macros.j2:78
+#: src/macros.j2:80
 #, python-format
 msgid "%(items)s, and %(last)s"
 msgstr "%(items)s a %(last)s"
 
 #. name of a re-used data set that has no name
-#: src/_mapping.j2:226 src/_mapping.j2:605
+#: src/_mapping.j2:204 src/_mapping.j2:526
 msgid "(unknown name)"
 msgstr "(neznámý název)"
 
 #. title of a produced data set that has no name
-#: src/_mapping.j2:409
+#: src/_mapping.j2:366
 msgid "(unnamed dataset)"
 msgstr "(datová sada bez názvu)"
 
 #. title of a cost that has neither a title nor a description; number = its
 #. position
-#: src/_mapping.j2:654
+#: src/_mapping.j2:570
 #, python-format
 msgid "Cost %(number)s"
 msgstr "Náklad %(number)s"
 
-#: src/_mapping.j2:245
+#: src/_mapping.j2:220
 #, python-format
 msgid "Non-reference dataset %(name)s contains personal data based on consent which covers our reuse."
 msgstr ""
 "Nereferenční datová sada %(name)s obsahuje osobní údaje na základě souhlasu, který pokrývá naše "
 "opětovné využití."
 
-#: src/_mapping.j2:247
+#: src/_mapping.j2:222
 #, python-format
 msgid ""
 "Non-reference dataset %(name)s contains personal data based on consent, but the consent does not "
@@ -61,37 +61,37 @@ msgstr ""
 "Nereferenční datová sada %(name)s obsahuje osobní údaje na základě souhlasu, který však nepokrývá"
 " zamýšlené opětovné využití; je nutný nový souhlas."
 
-#: src/_mapping.j2:259
+#: src/_mapping.j2:233
 #, python-format
 msgid "Non-reference dataset %(name)s contains personal data based on contract obligations."
 msgstr "Nereferenční datová sada %(name)s obsahuje osobní údaje na základě smluvních závazků."
 
-#: src/_mapping.j2:253
+#: src/_mapping.j2:227
 #, python-format
 msgid "Non-reference dataset %(name)s contains personal data based on legal requirements."
 msgstr "Nereferenční datová sada %(name)s obsahuje osobní údaje na základě právních požadavků."
 
-#: src/_mapping.j2:257
+#: src/_mapping.j2:231
 #, python-format
 msgid "Non-reference dataset %(name)s contains personal data based on legitimate interests."
 msgstr "Nereferenční datová sada %(name)s obsahuje osobní údaje na základě oprávněných zájmů."
 
-#: src/_mapping.j2:240
+#: src/_mapping.j2:217
 #, python-format
 msgid "Non-reference dataset %(name)s contains personal data based on public interest."
 msgstr "Nereferenční datová sada %(name)s obsahuje osobní údaje na základě veřejného zájmu."
 
-#: src/_mapping.j2:255
+#: src/_mapping.j2:229
 #, python-format
 msgid "Non-reference dataset %(name)s contains personal data based on vital interests."
 msgstr "Nereferenční datová sada %(name)s obsahuje osobní údaje na základě životně důležitých zájmů."
 
-#: src/_mapping.j2:234
+#: src/_mapping.j2:212
 #, python-format
 msgid "Non-reference dataset %(name)s does not contain any personal data."
 msgstr "Nereferenční datová sada %(name)s neobsahuje žádné osobní údaje."
 
-#: src/_mapping.j2:267
+#: src/_mapping.j2:241
 #, python-format
 msgid ""
 "Non-reference dataset %(name)s has been ethically approved and an extension of the existing "
@@ -100,7 +100,7 @@ msgstr ""
 "Nereferenční datová sada %(name)s byla eticky schválena a pro zamýšlené opětovné využití dat bude"
 " nutné rozšířit stávající etické schválení podle předpisů o etice výzkumu."
 
-#: src/_mapping.j2:264
+#: src/_mapping.j2:238
 #, python-format
 msgid ""
 "Non-reference dataset %(name)s has been ethically approved and no new approval is needed, as the "
@@ -109,7 +109,7 @@ msgstr ""
 "Nereferenční datová sada %(name)s byla eticky schválena a nové schválení není potřeba, protože "
 "stávající etické schválení podle předpisů o etice výzkumu pokrývá zamýšlené opětovné využití dat."
 
-#: src/_mapping.j2:270
+#: src/_mapping.j2:244
 #, python-format
 msgid ""
 "Non-reference dataset %(name)s has been ethically approved but new ethical approval under "
@@ -118,47 +118,47 @@ msgstr ""
 "Nereferenční datová sada %(name)s byla eticky schválena, ale pro zamýšlené využití dat bude nutné"
 " nové etické schválení podle předpisů o etice výzkumu."
 
-#: src/_mapping.j2:362
+#: src/_mapping.j2:324
 msgid "Our data must stay in EU."
 msgstr "Naše data musí zůstat v EU."
 
-#: src/_mapping.j2:364
+#: src/_mapping.j2:326
 msgid "Our data must stay in the same country."
 msgstr "Naše data musí zůstat ve stejné zemi."
 
-#: src/_mapping.j2:366
+#: src/_mapping.j2:328
 msgid "Our data must stay in the same institute."
 msgstr "Naše data musí zůstat ve stejné instituci."
 
-#: src/_mapping.j2:305
+#: src/_mapping.j2:275
 msgid "The consent form will be available for re-users."
 msgstr "Formulář souhlasu bude dostupný pro opětovné uživatele."
 
-#: src/_mapping.j2:303
+#: src/_mapping.j2:273
 msgid "The consent form will not be available for re-users."
 msgstr "Formulář souhlasu nebude dostupný pro opětovné uživatele."
 
-#: src/_mapping.j2:332
+#: src/_mapping.j2:298
 msgid "The data collection is covered by an ethical review."
 msgstr "Sběr dat je pokryt etickým posouzením."
 
-#: src/_mapping.j2:334
+#: src/_mapping.j2:300
 msgid "The data collection is not covered by an ethical review."
 msgstr "Sběr dat není pokryt etickým posouzením."
 
-#: src/_mapping.j2:329
+#: src/_mapping.j2:296
 msgid "The data collection is subject to ethical legislation."
 msgstr "Sběr dat podléhá etickým právním předpisům."
 
-#: src/_mapping.j2:345
+#: src/_mapping.j2:309
 msgid "There are legal reasons why some of our data cannot be open."
 msgstr "Existují právní důvody, proč některá naše data nemohou být otevřená."
 
-#: src/_mapping.j2:360
+#: src/_mapping.j2:322
 msgid "There are no restrictions where the data can be stored."
 msgstr "Neexistují žádná omezení, kde mohou být data uložena."
 
-#: src/_mapping.j2:351
+#: src/_mapping.j2:314
 msgid "There are privacy reasons so our data cannot be open."
 msgstr "Z důvodu ochrany soukromí naše data nemohou být otevřená."
 
@@ -176,16 +176,16 @@ msgstr ""
 " „%(uuid)s“."
 
 #. purposes = e.g. "ensuring findability and ensuring accessibility"
-#: src/_mapping.j2:648
+#: src/_mapping.j2:564
 #, python-format
 msgid "This resource is allocated for %(purposes)s of data."
 msgstr "Tento zdroj je vyčleněn na %(purposes)s dat."
 
-#: src/_mapping.j2:314
+#: src/_mapping.j2:284
 msgid "We are legally obliged to do this data processing (i.e. legal requirement)."
 msgstr "Toto zpracování dat nám ukládá zákon (tj. právní povinnost)."
 
-#: src/_mapping.j2:298
+#: src/_mapping.j2:269
 msgid ""
 "We ask for consent for anonymization; we will anonymise first and all further processing is on "
 "the anonymous data."
@@ -193,35 +193,35 @@ msgstr ""
 "Žádáme o souhlas s anonymizací; data nejprve anonymizujeme a veškeré další zpracování probíhá na "
 "anonymních datech."
 
-#: src/_mapping.j2:288
+#: src/_mapping.j2:260
 msgid "We ask the data subjects for their consent."
 msgstr "Subjekty údajů žádáme o souhlas."
 
-#: src/_mapping.j2:378
+#: src/_mapping.j2:340
 msgid "We can make the data more openly available by anonymization."
 msgstr "Data můžeme zpřístupnit otevřeněji pomocí anonymizace."
 
-#: src/_mapping.j2:372
+#: src/_mapping.j2:334
 msgid "We can make the data more openly available by pseudonymization."
 msgstr "Data můžeme zpřístupnit otevřeněji pomocí pseudonymizace."
 
-#: src/_mapping.j2:384
+#: src/_mapping.j2:346
 msgid "We can make the data more openly available through data aggregation."
 msgstr "Data můžeme zpřístupnit otevřeněji pomocí agregace dat."
 
-#: src/_mapping.j2:376
+#: src/_mapping.j2:338
 msgid "We cannot make the data more openly available by anonymization."
 msgstr "Data nemůžeme zpřístupnit otevřeněji pomocí anonymizace."
 
-#: src/_mapping.j2:370
+#: src/_mapping.j2:332
 msgid "We cannot make the data more openly available by pseudonymization."
 msgstr "Data nemůžeme zpřístupnit otevřeněji pomocí pseudonymizace."
 
-#: src/_mapping.j2:382
+#: src/_mapping.j2:344
 msgid "We cannot make the data more openly available through data aggregation."
 msgstr "Data nemůžeme zpřístupnit otevřeněji pomocí agregace dat."
 
-#: src/_mapping.j2:316
+#: src/_mapping.j2:286
 msgid ""
 "We do this for the benefit of society, and this is more important than the privacy of the "
 "subjects (i.e. public interest)."
@@ -229,7 +229,7 @@ msgstr ""
 "Děláme to ve prospěch společnosti, což je důležitější než soukromí subjektů údajů (tj. veřejný "
 "zájem)."
 
-#: src/_mapping.j2:310
+#: src/_mapping.j2:280
 msgid ""
 "We have a legitimate interest: data subjects all expect us to do this data processing because of "
 "who we are."
@@ -237,27 +237,27 @@ msgstr ""
 "Máme oprávněný zájem: subjekty údajů od nás toto zpracování dat očekávají vzhledem k tomu, kdo "
 "jsme."
 
-#: src/_mapping.j2:321
+#: src/_mapping.j2:289
 msgid "We need to conduct a data protection impact assessment (DPIA)."
 msgstr "Musíme provést posouzení vlivu na ochranu osobních údajů (DPIA)."
 
-#: src/_mapping.j2:312
+#: src/_mapping.j2:282
 msgid "We need to do this to save the data subject (i.e. vital interest)."
 msgstr "Musíme to udělat, abychom ochránili subjekt údajů (tj. životně důležitý zájem)."
 
-#: src/_mapping.j2:308
+#: src/_mapping.j2:278
 msgid "We require the processing to fulfil our contract with the data subjects."
 msgstr "Zpracování potřebujeme ke splnění smlouvy se subjekty údajů."
 
-#: src/_mapping.j2:292
+#: src/_mapping.j2:263
 msgid "We will collect consent for our specific use of the data."
 msgstr "Budeme získávat souhlas s naším konkrétním využitím dat."
 
-#: src/_mapping.j2:294
+#: src/_mapping.j2:265
 msgid "We will collect consent for our use as well as reuse of the data."
 msgstr "Budeme získávat souhlas s naším využitím i opětovným využitím dat."
 
-#: src/_mapping.j2:296
+#: src/_mapping.j2:267
 msgid ""
 "We will collect consent for our use of the data and for anonymization; we will anonymize the data"
 " afterwards for reuse."
@@ -265,29 +265,29 @@ msgstr ""
 "Budeme získávat souhlas s naším využitím dat a s anonymizací; data poté pro opětovné využití "
 "anonymizujeme."
 
-#: src/_mapping.j2:279
+#: src/_mapping.j2:252
 msgid "We will collect data connected to a person, i.e. \"personal data\"."
 msgstr "Budeme shromažďovat data vztahující se k osobám, tj. „osobní údaje“."
 
-#: src/_mapping.j2:633
+#: src/_mapping.j2:549
 msgid "ensuring accessibility"
 msgstr "zajištění dostupnosti"
 
 #. purposes of a cost, enumerated in "This resource is allocated for
 #. %(purposes)s of data."
-#: src/_mapping.j2:630
+#: src/_mapping.j2:546
 msgid "ensuring findability"
 msgstr "zajištění dohledatelnosti"
 
-#: src/_mapping.j2:636
+#: src/_mapping.j2:552
 msgid "ensuring interoperability"
 msgstr "zajištění interoperability"
 
-#: src/_mapping.j2:639
+#: src/_mapping.j2:555
 msgid "ensuring reusability"
 msgstr "zajištění opětovné použitelnosti"
 
-#: src/_mapping.j2:642
+#: src/_mapping.j2:558
 msgid "supporting management"
 msgstr "podporu správy"
 

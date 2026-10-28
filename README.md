@@ -1,6 +1,6 @@
 # Machine-Actionable DMP
 
-Template based on the [RDA DMP Common Standard (DCS)](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard) for machine-actionable Data Management Plans. It produces maDMPs in JSON according to the [DCS JSON schemas](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema) and the [OSTrails Application Profile](https://github.com/OSTrails/ostrails-madmp-ap). Template is designed for use in [Data Stewardship Wizard](https://ds-wizard.org) 5.0 or newer (for older versions, use the template version 1.x) with [*Common Data Stewardship knowledge model*](https://registry.ds-wizard.org/knowledge-models/dsw:root:latest) and [*Life Sciences DSW Knowledge Model*](https://registry.ds-wizard.org/knowledge-models/dsw:lifesciences:latest).
+Template based on the [RDA DMP Common Standard (DCS)](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard) for machine-actionable Data Management Plans. It produces maDMPs in JSON according to the [DCS JSON schemas](https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema) and the [OSTrails Application Profile](https://github.com/OSTrails/ostrails-madmp-ap). Template is designed for use in [Data Stewardship Wizard](https://ds-wizard.org) 5.0 or newer (for older versions, use the template version 1.x) with [*Common Data Stewardship knowledge model*](https://registry.ds-wizard.org/knowledge-models/dsw:root:latest) and [*Life Sciences DSW Knowledge Model*](https://registry.ds-wizard.org/knowledge-models/dsw:lifesciences:latest), version 2.8.1 or newer (for knowledge models 2.7, use the template version 2.0.0).
 
 
 ## Formats
@@ -41,6 +41,11 @@ This document template for DSW is available as open-source via GitHub Repository
 Starting v1.30.0, AI tools (Codex, Claude Code) are used to assist in the development of this template. The AI tools are used to generate text, fix typos, and improve grammar. The AI tools are used to assist the human contributors in the development of the template.
 
 ## Changelog
+
+### 3.0.0
+
+- Read replies by knowledge model annotations (`json.key`, `json.value`) instead of UUIDs; requires knowledge models 2.8.1 and newer
+- Fixed answers left from a changed or cleared reply (e.g. of GDPR considerations, or of a non-reference data set that will not be used) being exported
 
 ### 2.0.0
 
