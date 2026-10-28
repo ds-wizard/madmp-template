@@ -58,6 +58,7 @@
 } -%}
 {%- set contributors = [] -%}
 {%- set contacts = [] -%}
+{%- set contactCandidates = [] -%}{# people with a name and an e-mail but no role (not contributors in DCS) #}
 {%- for item in x.administrativeInformation.contributors -%}
   {%- set contributorName = item.name._value or "" -%}
   {%- set contributorEmail = item.email._value or "" -%}
@@ -104,15 +105,21 @@
     {%- if "contactPerson" in contributorRoleCodes and contributorEmail != "" -%}
       {%- do contacts.append(contributor) -%}
     {%- endif -%}
+  {%- elif contributorName != "" and contributorEmail != "" -%}
+    {%- do contactCandidates.append(contributor) -%}
   {%- endif -%}
 {%- endfor -%}
-{#- DCS requires a contact: without a contact person, the first contributor with an e-mail -#}
+{#- DCS requires a contact: without a contact person, the first contributor with an e-mail, else the
+    first person with a name and an e-mail who has no role -#}
 {%- if contacts|length == 0 -%}
   {%- for contributor in contributors if "mbox" in contributor -%}
     {%- if loop.first -%}
       {%- do contacts.append(contributor) -%}
     {%- endif -%}
   {%- endfor -%}
+{%- endif -%}
+{%- if contacts|length == 0 and contactCandidates|length > 0 -%}
+  {%- do contacts.append(contactCandidates[0]) -%}
 {%- endif -%}
 {#- Projects -#}
 {%- set projects = [] -%}
@@ -301,6 +308,52 @@
   {%- endif -%}
 {%- endif -%}
 
+{#- Ethical approval of the research projects -#}
+{%- set projectApprovalsAnswered = [] -%}
+{%- for item in x.administrativeInformation.projects -%}
+  {%- set approval = item.requiresEthicalApproval -%}
+  {%- if approval._uuid -%}
+    {%- do projectApprovalsAnswered.append(item._value) -%}
+  {%- endif -%}
+  {%- if approval._value == true -%}
+    {%- do ethicalIssues.append("project-ethical-approval") -%}
+    {#- TRANSLATORS: name of a research project that has neither a name nor an acronym -#}
+    {%- set projectTitle = item.name._value or item.acronym._value or _('(unnamed project)') -%}
+    {%- set approvals = [] -%}
+    {%- for authority in approval.authority -%}
+      {%- set caseNumber = (authority.caseNumber._value or "")|trim -%}
+      {%- set status = authority.status._value -%}
+      {#- TRANSLATORS: status of an ethical approval, used in "%(status)s (case number %(case)s)" -#}
+      {%- if status == "planned" -%}
+        {%- set statusText = _('planned') -%}
+      {%- elif status == "applied" -%}
+        {%- set statusText = _('applied for') -%}
+      {%- elif status == "granted" -%}
+        {%- set statusText = _('granted') -%}
+      {%- elif status == "rejected" -%}
+        {%- set statusText = _('rejected') -%}
+      {%- else -%}
+        {%- set statusText = "" -%}
+      {%- endif -%}
+      {%- if statusText and caseNumber -%}
+        {#- TRANSLATORS: one ethical approval, e.g. "granted (case number EC-2025-311)" -#}
+        {%- do approvals.append(_('%(status)s (case number %(case)s)', status=statusText|safe, case=caseNumber|safe)) -%}
+      {%- elif statusText -%}
+        {%- do approvals.append(statusText) -%}
+      {%- elif caseNumber -%}
+        {#- TRANSLATORS: an ethical approval without a status, e.g. "case number EC-2025-311" -#}
+        {%- do approvals.append(_('case number %(case)s', case=caseNumber|safe)) -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if approvals|length > 0 -%}
+      {#- TRANSLATORS: approvals = e.g. "granted (case number EC-2025-311) and applied for (case number X-1)" -#}
+      {%- do ethicalIssuesDescriptions.append(_('Project %(project)s requires ethical approval: %(approvals)s.', project=projectTitle|safe, approvals=macros.joinAnd(approvals)|safe)) -%}
+    {%- else -%}
+      {%- do ethicalIssuesDescriptions.append(_('Project %(project)s requires ethical approval.', project=projectTitle|safe)) -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
 {%- set canOpen = x.givingAccessToData.allOpenOverTime -%}
 {%- if canOpen._value == false -%}
   {%- set legalReasons = canOpen.legalReasons -%}
@@ -350,11 +403,52 @@
 
 {%- if ethicalIssues|length > 0 -%}
   {%- set ethicalIssuesExist = "yes" -%}
-{%- elif collectPersonal._uuid is none and ethicalLegislation._uuid is none -%}{# not answered yet #}
+{%- elif collectPersonal._uuid is none and ethicalLegislation._uuid is none and projectApprovalsAnswered|length == 0 -%}{# not answered yet #}
   {%- set ethicalIssuesExist = "unknown" -%}
 {%- else -%}
   {%- set ethicalIssuesExist = "no" -%}
 {%- endif -%}
+
+{#- Rights of the collected data and their use restrictions (rights of the produced datasets since 1.2) -#}
+{%- set rightsParts = [] -%}
+{%- set dataRights = x.creatingData.collectedDataRights -%}
+{%- if dataRights._value == "noCopyright" -%}
+  {%- do rightsParts.append(_('The data is legally not copyrightable.')) -%}
+{%- elif dataRights._value == "pi" -%}
+  {%- do rightsParts.append(_('The Principal Investigator will be the rights holder of the data.')) -%}
+{%- elif dataRights._value == "institute" -%}
+  {%- do rightsParts.append(_('The institute will be the rights holder of the data.')) -%}
+{%- elif dataRights._value == "consortiumAgreement" -%}
+  {%- do rightsParts.append(_('The intellectual property of the data is arranged by a consortium agreement.')) -%}
+{%- elif dataRights._value == "other" and dataRights.other._value -%}
+  {%- do rightsParts.append(plainText(dataRights.other)|trim|dot|safe) -%}
+{%- endif -%}
+{%- set useRestrictions = x.creatingData.dataUseRestrictions -%}
+{%- if useRestrictions._value == false -%}
+  {%- do rightsParts.append(_('There will be no use restrictions.')) -%}
+{%- elif useRestrictions._value == true -%}
+  {%- set reasons = [] -%}
+  {#- TRANSLATORS: backgrounds of data use restrictions, enumerated in "There will be use restrictions because of %(reasons)s." -#}
+  {%- for choice in useRestrictions.restrictions -%}
+    {%- if choice._value == "gdpr" -%}
+      {%- do reasons.append(_('GDPR')) -%}
+    {%- elif choice._value == "ethics" -%}
+      {%- do reasons.append(_('the ethical approval')) -%}
+    {%- elif choice._value == "consent" -%}
+      {%- do reasons.append(_('restrictions in the consent')) -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if reasons|length > 0 -%}
+    {#- TRANSLATORS: reasons = e.g. "GDPR and restrictions in the consent" -#}
+    {%- do rightsParts.append(_('There will be use restrictions because of %(reasons)s.', reasons=macros.joinAnd(reasons)|safe)) -%}
+  {%- else -%}
+    {%- do rightsParts.append(_('There will be use restrictions.')) -%}
+  {%- endif -%}
+  {%- if useRestrictions.description._value -%}
+    {%- do rightsParts.append(plainText(useRestrictions.description)|trim|dot|safe) -%}
+  {%- endif -%}
+{%- endif -%}
+{%- set datasetRights = rightsParts|join(" ") -%}
 
 {#- Datasets -#}
 {%- set datasets = [] -%}
@@ -477,6 +571,37 @@
   {%- if item.retention._uuid -%}{# how long it will be kept, as the KM names it, e.g. "For a fixed period (prepaid): 2 years" #}
     {%- set keepPeriod = (item.retention.period._value or "")|trim if item.retention._value == "fixedPeriod" else "" -%}
     {%- do dataset.update({"preservation_statement": [item.retention._label, keepPeriod]|select|join(": ")}) -%}
+  {%- endif -%}
+  {%- if dcsMinor >= 2 -%}{# rights and related_identifier since 1.2 #}
+    {%- if datasetRights -%}
+      {%- do dataset.update({"rights": datasetRights}) -%}
+    {%- endif -%}
+    {%- set related = [] -%}
+    {%- set publicationLink = (item.type.publication._value or "")|trim if item.type.publication is defined else "" -%}
+    {%- if publicationLink -%}{# the paper that this dataset supplements #}
+      {%- do related.append({
+        "identifier": publicationLink,
+        "type": "url" if publicationLink.startswith("http") else ("doi" if publicationLink.startswith("10.") else "other"),
+        "relation_type": "IsSupplementTo",
+        "resource_type": "JournalArticle"
+      }) -%}
+    {%- endif -%}
+    {%- if item.published._value == true and item.published.qualifiedReferences._value == true -%}
+      {%- for reference in item.published.qualifiedReferences.references -%}
+        {%- set referenceId = (reference.identifier._value or "")|trim -%}
+        {%- if referenceId -%}{# qualified references to other datasets #}
+          {%- do related.append({
+            "identifier": referenceId,
+            "type": "url" if referenceId.startswith("http") else ("doi" if referenceId.startswith("10.") else "other"),
+            "relation_type": "References",
+            "resource_type": "Dataset"
+          }) -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+    {%- if related|length > 0 -%}
+      {%- do dataset.update({"related_identifier": related}) -%}
+    {%- endif -%}
   {%- endif -%}
   {%- if distributions|length > 0 -%}
     {%- do dataset.update({"distribution": distributions}) -%}
